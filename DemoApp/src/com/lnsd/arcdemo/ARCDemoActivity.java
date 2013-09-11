@@ -1,13 +1,13 @@
 package com.lnsd.arcdemo;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.lnsd.arcdemo.entity.TitleValueEntity;
+import com.lnsd.arcdemo.entity.ARCDataEntity;
+import com.lnsd.arcdemo.entity.ARCDataLayer;
 import com.lnsd.arcdemo.view.RadarChart;
 
 public class ARCDemoActivity extends Activity {
@@ -30,28 +30,32 @@ public class ARCDemoActivity extends Activity {
 	        //chart.setGridStrokeWidth(40f);
 	        //chart.setGridLabelSize(40f);
 	        
-			List<TitleValueEntity> data1 = new ArrayList<TitleValueEntity>();
-			data1.add(new TitleValueEntity("A", 1));
-			data1.add(new TitleValueEntity("B", 1));
-			data1.add(new TitleValueEntity("C", 1));
-			data1.add(new TitleValueEntity("D", 1));
-			data1.add(new TitleValueEntity("E", 1));
-			data1.add(new TitleValueEntity("F", 1));
+			ARCDataLayer data1 = new ARCDataLayer(
+					Color.BLUE, ARCDataLayer.DEFAULT_LBORDER_WIDTH,
+					Color.BLUE, ARCDataLayer.DEFAULT_LFILL_ALPHA);
+			data1.add(new ARCDataEntity("A", 2));
+			data1.add(new ARCDataEntity("B", 10));
+			data1.add(new ARCDataEntity("C", 5));
+			data1.add(new ARCDataEntity("D", 2));
+			data1.add(new ARCDataEntity("E", 10));
+			data1.add(new ARCDataEntity("F", 5));
 
-			List<TitleValueEntity> data2 = new ArrayList<TitleValueEntity>();
-			data2.add(new TitleValueEntity("A", 2));
-			data2.add(new TitleValueEntity("B", 2));
-			data2.add(new TitleValueEntity("C", 2));
-			data2.add(new TitleValueEntity("D", 2));
-			data2.add(new TitleValueEntity("E", 2));
-			data2.add(new TitleValueEntity("F", 2));
+			ARCDataLayer data2 = new ARCDataLayer(
+					Color.GREEN, ARCDataLayer.DEFAULT_LBORDER_WIDTH,
+					Color.GREEN, ARCDataLayer.DEFAULT_LFILL_ALPHA);
+			data2.add(new ARCDataEntity("A", 10));
+			data2.add(new ARCDataEntity("B", 2));
+			data2.add(new ARCDataEntity("C", 5));
+			data2.add(new ARCDataEntity("D", 10));
+			data2.add(new ARCDataEntity("E", 2));
+			data2.add(new ARCDataEntity("F", 5));
 
-			List<List<TitleValueEntity>> data = new ArrayList<List<TitleValueEntity>>();
+			ArrayList<ARCDataLayer> data = new ArrayList<ARCDataLayer>();
 			data.add(data1);
 			data.add(data2);
 
 			chart.setData(data);
-			chart.setLongitudeNum(5);
+			chart.setLongitudeNum(6);
 			chart.setLatitudeNum(10);
 	    
 	}

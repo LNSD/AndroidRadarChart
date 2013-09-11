@@ -14,7 +14,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
-import com.lnsd.arcdemo.entity.TitleValueEntity;
+import com.lnsd.arcdemo.entity.ARCDataEntity;
+import com.lnsd.arcdemo.entity.ARCDataLayer;
 
 public class RadarChart extends BaseChart {
 
@@ -42,16 +43,16 @@ public class RadarChart extends BaseChart {
 	public static final int DEFAULT_GLABEL_COLOR = Color.BLACK;
 	public static final float DEFAULT_GLABEL_SIZE = 32f;
 	public static final float DEFAULT_STROKE_WIDTH = 2f;
-	public static final float DEFAULT_GLABEL_PADDING = 15f;
+	public static final float DEFAULT_GLABEL_PADDING = 16f;
 
-	public static final int[] COLORS = { Color.RED, Color.BLUE, Color.YELLOW };
+	public static final int[] COLORS = { Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
 
 	/*
 	 *  Variables
 	 */
 
 	private int chartType = RADAR_CHART;
-	private List<List<TitleValueEntity>> data;
+	private List<ARCDataLayer> data;
 	private String title = DEFAULT_TITLE;
 	private Point position = DEFAULT_POSITION;
 	private boolean displayLongitude = DEFAULT_DISPLAY_LONGITUDE;
@@ -175,7 +176,7 @@ public class RadarChart extends BaseChart {
 	 *         </p>
 	 *         
 	 */
-	protected List<PointF> getDataPoints(List<TitleValueEntity> data) {
+	protected List<PointF> getDataPoints(ARCDataLayer data) {
 		List<PointF> points = new ArrayList<PointF>();
 		for (int i = 0; i < longitudeNum; i++) {
 			PointF pt = new PointF();
@@ -241,7 +242,7 @@ public class RadarChart extends BaseChart {
 				}
 
 				// Draw labels. Label defined by the first list.
-				String title = data.get(0).get(i).getTitle();
+				String title = data.get(0).get(i).getLabel();
 
 				Rect labelRect = new Rect();
 				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
@@ -256,7 +257,6 @@ public class RadarChart extends BaseChart {
 		}
 		mPath.close();
 		canvas.drawPath(mPath, mPaintGridFill);
-
 
 		// draw longitude lines
 		for (int i = 0; i < pointList.size(); i++) {
@@ -284,9 +284,8 @@ public class RadarChart extends BaseChart {
 			mPathInner.close();
 			canvas.drawPath(mPathInner, mPaintGridLatitude);
 		}
-
-
 	}
+	
 	protected void drawRadarGrid(Canvas canvas) {
 		Paint mPaintGridFill = new Paint();
 		mPaintGridFill.setColor(backgroundColor);
@@ -321,7 +320,7 @@ public class RadarChart extends BaseChart {
 			for (int i = 0; i < pointList.size(); i++) {
 
 				// Draw labels. Label defined by the first list.
-				String title = data.get(0).get(i).getTitle();
+				String title = data.get(0).get(i).getLabel();
 
 				Rect labelRect = new Rect();
 				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
@@ -361,32 +360,33 @@ public class RadarChart extends BaseChart {
 	protected void drawData(Canvas canvas) {
 		if (null != data) {
 			for (int j = 0; j < data.size(); j++) {
-				List<TitleValueEntity> list = data.get(j);
+				ARCDataLayer layer = data.get(j);
 
 				Paint mPaintFill = new Paint();
-				mPaintFill.setColor(COLORS[j]);
+				mPaintFill.setColor(layer.getLayerFillColor());
 				mPaintFill.setStyle(Style.FILL);
 				mPaintFill.setAntiAlias(true);
-				mPaintFill.setAlpha(70);
+				mPaintFill.setAlpha(layer.getLayerFillAlpha());
 
 				Paint mPaintBorder = new Paint();
-				mPaintBorder.setColor(COLORS[j]);
+				mPaintBorder.setColor(layer.getLayerBorderColor());
 				mPaintBorder.setStyle(Style.STROKE);
-				mPaintBorder.setStrokeWidth(2);
+				mPaintBorder.setStrokeWidth(layer.getLayerBorderWidth());
 				mPaintBorder.setAntiAlias(true);
 
-				// paint to draw fonts
+				//TODO Check. Paint to draw fonts.
 				Paint mPaintFont = new Paint();
 				mPaintFont.setColor(Color.WHITE);
 
 				// paint to draw points
 				Paint mPaintPoint = new Paint();
-				mPaintPoint.setColor(COLORS[j]);
+				//TODO Get point color from ARCDataEntity
+				mPaintPoint.setColor(layer.getLayerBorderColor());
 
 				Path mPath = new Path();
 
 				// get points to draw
-				List<PointF> pointList = getDataPoints(list);
+				List<PointF> pointList = getDataPoints(layer);
 				// initialize path
 				for (int i = 0; i < pointList.size(); i++) {
 					PointF pt = pointList.get(i);
@@ -408,7 +408,7 @@ public class RadarChart extends BaseChart {
 	/**
 	 * @return the data
 	 */
-	public List<List<TitleValueEntity>> getData() {
+	public List<ARCDataLayer> getData() {
 		return data;
 	}
 
@@ -416,7 +416,7 @@ public class RadarChart extends BaseChart {
 	 * @param data
 	 *            the data to set
 	 */
-	public void setData(List<List<TitleValueEntity>> data) {
+	public void setData(ArrayList<ARCDataLayer> data) {
 		this.data = data;
 	}
 
