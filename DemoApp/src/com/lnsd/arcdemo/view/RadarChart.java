@@ -11,24 +11,46 @@ import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 
 import com.lnsd.arcdemo.entity.TitleValueEntity;
 
-public class SpiderWebChart extends BaseChart {
+public class RadarChart extends BaseChart {
 
+	/*
+	 * Constants
+	 */
+
+	// Chart types
+	public static final int NO_GRID = 0;
+	public static final int SPIDER_WEB_CHART = 1;
+	public static final int RADAR_CHART = 2;
+
+	// Useful constants
 	public static final String DEFAULT_TITLE = "Spider Web Chart";
 	public static final boolean DEFAULT_DISPLAY_LONGITUDE = true;
 	public static final int DEFAULT_LONGITUDE_NUM = 5;
 	public static final int DEFAULT_LONGITUDE_LENGTH = 80;
-	public static final int DEFAULT_LONGITUDE_COLOR = Color.BLACK;
 	public static final boolean DEFAULT_DISPLAY_LATITUDE = true;
 	public static final int DEFAULT_LATITUDE_NUM = 5;
-	public static final int DEFAULT_LATITUDE_COLOR = Color.BLACK;
 	public static final Point DEFAULT_POSITION = new Point(0, 0);
-	public static final int DEFAULT_BACKGROUND_COLOR = Color.GRAY;
+
+	public static final int DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
+	public static final int DEFAULT_LATITUDE_COLOR = Color.BLACK;
+	public static final int DEFAULT_LONGITUDE_COLOR = Color.BLACK;
+	public static final int DEFAULT_GLABEL_COLOR = Color.BLACK;
+	public static final float DEFAULT_GLABEL_SIZE = 32f;
+	public static final float DEFAULT_STROKE_WIDTH = 2f;
+	public static final float DEFAULT_GLABEL_PADDING = 15f;
+
 	public static final int[] COLORS = { Color.RED, Color.BLUE, Color.YELLOW };
-	
+
+	/*
+	 *  Variables
+	 */
+
+	private int chartType = RADAR_CHART;
 	private List<List<TitleValueEntity>> data;
 	private String title = DEFAULT_TITLE;
 	private Point position = DEFAULT_POSITION;
@@ -38,16 +60,26 @@ public class SpiderWebChart extends BaseChart {
 	private int longitudeLength = DEFAULT_LONGITUDE_LENGTH;
 	private boolean displayLatitude = DEFAULT_DISPLAY_LATITUDE;
 	private int latitudeNum = DEFAULT_LATITUDE_NUM;
-	private int latitudeColor = DEFAULT_LATITUDE_COLOR;
-	private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
 
-	public SpiderWebChart(Context context) {
+	// Colors & stroke width
+	private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
+	private int gridBorderColor = -1;
+	private int gridLatitudeColor = DEFAULT_LATITUDE_COLOR;
+	private int gridLongitudeColor = DEFAULT_LONGITUDE_COLOR;
+	private int gridLabelColor = DEFAULT_GLABEL_COLOR;
+	private float gridLabelSize = DEFAULT_GLABEL_SIZE;
+	private float gridStrokeWidth = DEFAULT_STROKE_WIDTH;
+	private float gridBorderStrokeWidth = -1;
+	private float gridLabelPadding = DEFAULT_GLABEL_PADDING;
+
+
+	public RadarChart(Context context) {
 		super(context);
 	}
-	public SpiderWebChart(Context context, AttributeSet attrs, int defStyle) {
+	public RadarChart(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
-	public SpiderWebChart(Context context, AttributeSet attrs) {
+	public RadarChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
@@ -70,12 +102,22 @@ public class SpiderWebChart extends BaseChart {
 		// calculate longitude length
 		longitudeLength = (int) ((rect / 2f) * 0.8);
 
-		// calculate position
+		// calculate position TODO Check this out
 		position = new Point((int) (super.getWidth() / 2f),
 				(int) (super.getHeight() / 2f + 0.2 * longitudeLength));
 
-		// draw this chart
-		drawSpiderWeb(canvas);
+		// draw this chart-grid
+		switch (chartType) {
+		case 0: //No grid
+			//TODO Draw NO background grid.
+			break;
+		case 1: //Spider Web chart
+			drawSpiderWeb(canvas);
+			break;
+		default:
+			drawRadarGrid(canvas);
+			break;
+		}
 
 		// draw data on chart
 		drawData(canvas);
@@ -88,7 +130,7 @@ public class SpiderWebChart extends BaseChart {
 	 * 
 	 * @param pos
 	 *            <p>
-	 *            latitude degree
+	 *            Latitude degree. 1 = Grid border
 	 *            </p>
 	 * 
 	 * @return List<PointF>
@@ -111,6 +153,11 @@ public class SpiderWebChart extends BaseChart {
 		}
 		return points;
 	}
+
+	protected float getRadarRadiusPoints(float pos) {		
+		return (float) longitudeLength * pos;
+	}
+
 
 	/**
 	 * <p>
@@ -154,32 +201,37 @@ public class SpiderWebChart extends BaseChart {
 	 *            Canvas
 	 */
 	protected void drawSpiderWeb(Canvas canvas) {
-		Paint mPaintWebFill = new Paint();
-		mPaintWebFill.setColor(Color.GRAY);
-		mPaintWebFill.setAntiAlias(true);
+		Paint mPaintGridFill = new Paint();
+		mPaintGridFill.setColor(backgroundColor);
+		mPaintGridFill.setAntiAlias(true);
 
-		Paint mPaintWebBorder = new Paint();
-		mPaintWebBorder.setColor(Color.WHITE);
-		mPaintWebBorder.setStyle(Style.STROKE);
-		mPaintWebBorder.setStrokeWidth(2);
-		mPaintWebBorder.setAntiAlias(true);
+		Paint mPaintGridBorder = new Paint();
+		mPaintGridBorder.setColor(
+				(gridBorderColor==-1)? gridLatitudeColor:gridBorderColor);
+		mPaintGridBorder.setStyle(Style.STROKE);
+		mPaintGridBorder.setStrokeWidth(
+				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
+		mPaintGridBorder.setAntiAlias(true);
 
-		Paint mPaintWebInnerBorder = new Paint();
-		mPaintWebInnerBorder.setColor(Color.LTGRAY);
-		mPaintWebInnerBorder.setStyle(Style.STROKE);
-		mPaintWebInnerBorder.setAntiAlias(true);
+		Paint mPaintGridLatitude = new Paint();
+		mPaintGridLatitude.setColor(gridLatitudeColor);
+		mPaintGridLatitude.setStyle(Style.STROKE);
+		mPaintGridLatitude.setStrokeWidth(gridStrokeWidth);
+		mPaintGridLatitude.setAntiAlias(true);
 
-		Paint mPaintLine = new Paint();
-		mPaintLine.setColor(Color.LTGRAY);
+		Paint mPaintGridLongitude = new Paint();
+		mPaintGridLongitude.setColor(gridLongitudeColor);
+		mPaintGridLongitude.setStrokeWidth(gridStrokeWidth);
 
-		Paint mPaintFont = new Paint();
-		mPaintFont.setColor(Color.LTGRAY);
+		Paint mPaintLabelFont = new Paint();
+		mPaintLabelFont.setColor(gridLabelColor);
+		mPaintLabelFont.setTextSize(gridLabelSize);
 
 		Path mPath = new Path();
 		List<PointF> pointList = getWebAxisPoints(1);
 
-		// draw border
-		if (null != data) {
+		//Draw fill-background
+		if (data != null) {
 			for (int i = 0; i < pointList.size(); i++) {
 				PointF pt = pointList.get(i);
 				if (i == 0) {
@@ -188,34 +240,32 @@ public class SpiderWebChart extends BaseChart {
 					mPath.lineTo(pt.x, pt.y);
 				}
 
-				// draw title
+				// Draw labels. Label defined by the first list.
 				String title = data.get(0).get(i).getTitle();
-				float realx = 0;
-				float realy = 0;
 
-				// TODO title position
-				if (pt.x < position.x) {
-					realx = pt.x - mPaintFont.measureText(title) - 5;
-				} else if (pt.x > position.x) {
-					realx = pt.x + 5;
-				} else {
-					realx = pt.x - mPaintFont.measureText(title) / 2;
-				}
+				Rect labelRect = new Rect();
+				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
 
-				if (pt.y > position.y) {
-					realy = pt.y + 10;
-				} else if (pt.y < position.y) {
-					realy = pt.y - 2;
-				} else {
-					realy = pt.y - 5;
-				}
+				float offsetX = (float) (position.x - labelRect.width()/2
+						- (longitudeLength + gridLabelPadding) * Math.sin(i * 2 * Math.PI / longitudeNum) );
+				float offsetY = (float) (position.y + labelRect.height()/2
+						- (longitudeLength + gridLabelPadding) * Math.cos(i * 2 * Math.PI / longitudeNum));
 
-				canvas.drawText(title, realx, realy, mPaintFont);
+				canvas.drawText(title, offsetX, offsetY, mPaintLabelFont);
 			}
 		}
 		mPath.close();
-		canvas.drawPath(mPath, mPaintWebFill);
-		canvas.drawPath(mPath, mPaintWebBorder);
+		canvas.drawPath(mPath, mPaintGridFill);
+
+
+		// draw longitude lines
+		for (int i = 0; i < pointList.size(); i++) {
+			PointF pt = pointList.get(i);
+			canvas.drawLine(position.x, position.y, pt.x, pt.y, mPaintGridLongitude);
+		}
+
+		//Draw web border
+		canvas.drawPath(mPath, mPaintGridBorder);
 
 		// draw spider web
 		for (int j = 1; j < latitudeNum; j++) {
@@ -232,16 +282,75 @@ public class SpiderWebChart extends BaseChart {
 				}
 			}
 			mPathInner.close();
-			canvas.drawPath(mPathInner, mPaintWebInnerBorder);
+			canvas.drawPath(mPathInner, mPaintGridLatitude);
 		}
 
-		// draw longitude lines
+
+	}
+	protected void drawRadarGrid(Canvas canvas) {
+		Paint mPaintGridFill = new Paint();
+		mPaintGridFill.setColor(backgroundColor);
+		mPaintGridFill.setAntiAlias(true);
+
+		Paint mPaintGridBorder = new Paint();
+		mPaintGridBorder.setColor(
+				(gridBorderColor==-1)? gridLatitudeColor:gridBorderColor);
+		mPaintGridBorder.setStyle(Style.STROKE);
+		mPaintGridBorder.setStrokeWidth(
+				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
+		mPaintGridBorder.setAntiAlias(true);
+
+		Paint mPaintGridLatitude = new Paint();
+		mPaintGridLatitude.setColor(gridLatitudeColor);
+		mPaintGridLatitude.setStyle(Style.STROKE);
+		mPaintGridLatitude.setStrokeWidth(gridStrokeWidth);
+		mPaintGridLatitude.setAntiAlias(true);
+
+		Paint mPaintGridLongitude = new Paint();
+		mPaintGridLongitude.setColor(gridLongitudeColor);
+		mPaintGridLongitude.setStrokeWidth(gridStrokeWidth);
+
+		Paint mPaintLabelFont = new Paint();
+		mPaintLabelFont.setColor(gridLabelColor);
+		mPaintLabelFont.setTextSize(gridLabelSize);
+
+		List<PointF> pointList = getWebAxisPoints(1);
+
+		//Draw fill-background
+		if (data != null) {
+			for (int i = 0; i < pointList.size(); i++) {
+
+				// Draw labels. Label defined by the first list.
+				String title = data.get(0).get(i).getTitle();
+
+				Rect labelRect = new Rect();
+				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
+
+				float offsetX = (float) (position.x - labelRect.width()/2
+						- (longitudeLength + gridLabelPadding) * Math.sin(i * 2 * Math.PI / longitudeNum) );
+				float offsetY = (float) (position.y + labelRect.height()/2
+						- (longitudeLength + gridLabelPadding) * Math.cos(i * 2 * Math.PI / longitudeNum));
+
+				canvas.drawText(title, offsetX, offsetY, mPaintLabelFont);
+			}
+		}
+		canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(1), mPaintGridFill);
+
+
+		// Draw longitude lines
 		for (int i = 0; i < pointList.size(); i++) {
 			PointF pt = pointList.get(i);
-			canvas.drawLine(position.x, position.y, pt.x, pt.y, mPaintLine);
+			canvas.drawLine(position.x, position.y, pt.x, pt.y, mPaintGridLongitude);
+		}
+
+		//Draw grid border
+		canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(1), mPaintGridBorder);
+
+		// Draw latitude lines
+		for (int j = 1; j < latitudeNum; j++) {
+			canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(j * 1f / latitudeNum), mPaintGridLatitude);
 		}
 	}
-
 	/**
 	 * <p>
 	 * Draw the data
@@ -432,21 +541,6 @@ public class SpiderWebChart extends BaseChart {
 	}
 
 	/**
-	 * @return the latitudeColor
-	 */
-	public int getLatitudeColor() {
-		return latitudeColor;
-	}
-
-	/**
-	 * @param latitudeColor
-	 *            the latitudeColor to set
-	 */
-	public void setLatitudeColor(int latitudeColor) {
-		this.latitudeColor = latitudeColor;
-	}
-
-	/**
 	 * @return the backgroundColor
 	 */
 	public int getBackgroundColor() {
@@ -459,5 +553,31 @@ public class SpiderWebChart extends BaseChart {
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
-	
+	public void setGridLatitudeColor(int gridLatitudeColor) {
+		this.gridLatitudeColor = gridLatitudeColor;
+	}
+	public void setGridLongitudeColor(int gridLongitudeColor) {
+		this.gridLongitudeColor = gridLongitudeColor;
+	}
+	public void setGridStrokeWidth(float gridStrokeWidth) {
+		this.gridStrokeWidth = gridStrokeWidth;
+	}
+	public void setGridLabelColor(int color) {
+		this.gridLabelColor = color;
+	}
+	public void setGridLabelSize(float size){
+		this.gridLabelSize = size;
+	}
+	public void setGridBorderColor(int color){
+		this.gridBorderColor = color;
+	}
+	public void setChartGridType(int type){
+		this.chartType = type;
+	}
+	public void setGridBorderStrokeWidth(float width){
+		this.gridBorderStrokeWidth = width;
+	}
+	public void setGridLabelPadding(float gridLabelPadding) {
+		this.gridLabelPadding = gridLabelPadding;
+	}
 }

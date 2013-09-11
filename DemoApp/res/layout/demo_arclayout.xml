@@ -11,10 +11,14 @@
 
     <FrameLayout
         android:id="@+id/graphFrameLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
         android:layout_gravity="center" >
 
+        <com.lnsd.arcdemo.view.RadarChart
+            android:id="@+id/arcChart"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
     </FrameLayout>
 
 </FrameLayout>
