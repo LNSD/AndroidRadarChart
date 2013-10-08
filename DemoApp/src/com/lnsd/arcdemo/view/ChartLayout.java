@@ -3,18 +3,18 @@ package com.lnsd.arcdemo.view;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.view.View;
+import android.view.ViewGroup;
 
-public class BaseChart extends View {
+public class ChartLayout extends ViewGroup {
 
 	
-	public BaseChart(Context context) {
+	public ChartLayout(Context context) {
 		super(context);
 	}
-	public BaseChart(Context context, AttributeSet attrs) {
+	public ChartLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
-	public BaseChart(Context context, AttributeSet attrs, int defStyle) {
+	public ChartLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
 
@@ -56,5 +56,10 @@ public class BaseChart extends View {
 			result = Math.min(result, specSize);
 		}
 		return result;
+	}
+	
+	@Override protected void onLayout (boolean changed, int left, int top, int right, int bottom){
+		// Do nothing. Do not call the superclass method--that would start a layout pass
+		// on this view's children. RadarChart lays out its children in onSizeChanged().
 	}
 }
