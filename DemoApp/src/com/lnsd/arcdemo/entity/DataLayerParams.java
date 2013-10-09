@@ -1,0 +1,41 @@
+package com.lnsd.arcdemo.entity;
+
+import android.graphics.Color;
+
+/*
+ * Layer customization Class
+ */
+public class DataLayerParams { //TODO Rename ASAP
+	public static final float DEFAULT_LBORDER_WIDTH = 2f;
+	public static final int DEFAULT_LFILL_ALPHA = 70;
+	
+	private int layerBorderColor = Color.BLACK;
+	private float layerBorderWidth = DEFAULT_LBORDER_WIDTH;
+	private int layerFillColor = Color.BLACK;
+	private int layerFillAlpha = DEFAULT_LFILL_ALPHA;
+	
+	public int getLayerBorderColor() {
+		return layerBorderColor;
+	}
+	public void setLayerBorderColor(int layerBorderColor) {
+		this.layerBorderColor = layerBorderColor;
+	}
+	public float getLayerBorderWidth() {
+		return layerBorderWidth;
+	}
+	public void setLayerBorderWidth(float layerBorderWidth) {
+		this.layerBorderWidth = layerBorderWidth;
+	}
+	public int getLayerFillColor() {
+		return layerFillColor;
+	}
+	public void setLayerFillColor(int layerFillColor) {
+		this.layerFillColor = layerFillColor;
+	}
+	public int getLayerFillAlpha() {
+		return layerFillAlpha;
+	}
+	public void setLayerFillAlpha(int layerFillAlpha) {
+		this.layerFillAlpha = layerFillAlpha;
+	}
+}

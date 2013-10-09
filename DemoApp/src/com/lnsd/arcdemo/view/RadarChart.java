@@ -14,7 +14,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
-import com.lnsd.arcdemo.entity.ARCDataEntity;
 import com.lnsd.arcdemo.entity.ARCDataLayer;
 
 public class RadarChart extends BaseChart {

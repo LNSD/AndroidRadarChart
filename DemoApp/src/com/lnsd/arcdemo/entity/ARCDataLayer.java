@@ -1,74 +1,64 @@
 package com.lnsd.arcdemo.entity;
 
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 import android.graphics.Color;
 
-public class ARCDataLayer {
-	public static final float DEFAULT_LBORDER_WIDTH = 2f;
-	public static final int DEFAULT_LFILL_ALPHA = 70;	
+@SuppressWarnings("serial")
+public class ARCDataLayer extends TreeMap<String, Float> {
 	
-	private ArrayList<ARCDataEntity> dataList = new ArrayList<ARCDataEntity>();
-	private int layerBorderColor = Color.BLACK;
-	private float layerBorderWidth = DEFAULT_LBORDER_WIDTH;
-	private int layerFillColor = Color.BLACK;
-	private int layerFillAlpha = DEFAULT_LFILL_ALPHA;
-
-	public ARCDataLayer(int color, float borderWidth){
-		this.layerBorderColor = color;
-		this.layerBorderWidth = borderWidth;
-		this.layerFillColor = Color.TRANSPARENT;
-	}
-	public ARCDataLayer(int fillColor, int alpha){
-		this.layerBorderColor = fillColor;
-		this.layerFillColor = fillColor;
-		this.layerFillAlpha = alpha;
-	}
-	public ARCDataLayer(int strokeColor, float borderWidth, int fillColor, int fillAlpha){
-		this.layerBorderColor = strokeColor;
-		this.layerBorderWidth = borderWidth;
-		this.layerFillColor = fillColor;
-		this.layerFillAlpha = fillAlpha;
+	private DataLayerParams params = new DataLayerParams();
+	
+	/**
+	 * Empty constructor.
+	 */
+	public ARCDataLayer(){}
+	
+	/**
+	 * Class constructor.
+	 * @param params Custom params.
+	 */
+	public ARCDataLayer(DataLayerParams params){
+		this.params = params;
 	}
 
-	public void add(ARCDataEntity data){
-		if(data.getPointColor() == -1)
-			data.setPointColor(layerBorderColor);
-		dataList.add(data);
-	}
-	public ArrayList<ARCDataEntity> getDataList(){
-		return dataList;
-	}
- 	public ARCDataEntity get(int index){
-		return dataList.get(index);
-	}
-	public int getDataEntitiesLength(){
-		return dataList.size();
-	}
-
-	public void setLayerBorderColor(int color){
-		this.layerBorderColor = color;
-	}
-	public int getLayerBorderColor(){
-		return layerBorderColor;
-	}
-	public void setLayerFillColor(int color){
-		this.layerFillColor = color;
-	}
-	public int getLayerFillColor(){
-		return layerFillColor;
-	}
-	public void setLayerBorderWidth(float layerBorderWidth) {
-		this.layerBorderWidth = layerBorderWidth;
-	}
-	public float getLayerBorderWidth() {
-		return layerBorderWidth;
-	}	
-	public void setLayerFillAlpha(int layerFillAlpha) {
-		this.layerFillAlpha = layerFillAlpha;
-	}
-	public int getLayerFillAlpha() {
-		return layerFillAlpha;
+	/**
+	 * Compares if both dataLayers are compatible.
+	 * If both DataLayer objects have the same keys stored, they are compatibles. 
+	 * @param dataLayer DataLayer to compare .
+	 * @return If compatible returns true, false otherwise.
+	 */
+	public boolean check(ARCDataLayer dataLayer){
+		if(this.size() != dataLayer.size()) return false;
+		for (Map.Entry<String,Float> entry: dataLayer.entrySet()) {
+			if(!containsKey(entry.getKey())) return false;
+		}
+		
+		return true;
 	}
 	
+	/**
+	 * Gets the maximum value stored in the DataLayer.
+	 * @return Maximum value.
+	 */
+	public float getMaxValue(){
+		float max = 0;
+		for (Map.Entry<String,Float> entry: entrySet()) {
+			if(entry.getValue()>max) max = entry.getValue();
+		}
+		return max;
+	}
+
+	/*
+	 * Getters & Setters
+	 */
+	
+	public DataLayerParams getLayerParameters() {
+		return params;
+	}
+	public void setLayerParameters(DataLayerParams params) {
+		this.params = params;
+	}
+
 }
