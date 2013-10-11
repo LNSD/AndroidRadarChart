@@ -1,4 +1,4 @@
-package com.lnsd.arcdemo.view;
+package com.lnsd.arcdemo.oldview;
 
 import android.content.Context;
 import android.graphics.Rect;

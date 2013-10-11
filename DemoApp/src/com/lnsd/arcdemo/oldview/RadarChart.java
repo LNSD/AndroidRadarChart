@@ -1,4 +1,4 @@
-package com.lnsd.arcdemo.view;
+/*package com.lnsd.arcdemo.oldview;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +18,9 @@ import com.lnsd.arcdemo.entity.ARCDataLayer;
 
 public class RadarChart extends BaseChart {
 
-	/*
+	
 	 * Constants
-	 */
+	 
 
 	// Chart types
 	public static final int NO_GRID = 0;
@@ -46,9 +46,9 @@ public class RadarChart extends BaseChart {
 
 	public static final int[] COLORS = { Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
 
-	/*
+	
 	 *  Variables
-	 */
+	 
 
 	private int chartType = RADAR_CHART;
 	private List<ARCDataLayer> data;
@@ -83,7 +83,7 @@ public class RadarChart extends BaseChart {
 		super(context, attrs);
 	}
 
-	/*
+	
 	 * (non-Javadoc)
 	 * 
 	 * <p>Called when is going to draw this chart<p> 
@@ -91,7 +91,7 @@ public class RadarChart extends BaseChart {
 	 * @param canvas
 	 * 
 	 * @see android.view.View#onDraw(android.graphics.Canvas)
-	 */
+	 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -102,14 +102,14 @@ public class RadarChart extends BaseChart {
 		// calculate longitude length
 		longitudeLength = (int) ((rect / 2f) * 0.8);
 
-		// calculate position TODO Check this out
+		// calculate position Check this out
 		position = new Point((int) (super.getWidth() / 2f),
 				(int) (super.getHeight() / 2f + 0.2 * longitudeLength));
 
 		// draw this chart-grid
 		switch (chartType) {
 		case 0: //No grid
-			//TODO Draw NO background grid.
+			//Draw NO background grid.
 			break;
 		case 1: //Spider Web chart
 			drawSpiderWeb(canvas);
@@ -123,7 +123,7 @@ public class RadarChart extends BaseChart {
 		drawData(canvas);
 	}
 
-	/**
+	*//**
 	 * <p>
 	 * calculate the points to draw the latitude lines
 	 * </p>
@@ -138,7 +138,7 @@ public class RadarChart extends BaseChart {
 	 *         result points
 	 *         </p>
 	 *         
-	 */
+	 *//*
 	protected List<PointF> getWebAxisPoints(float pos) {
 		List<PointF> points = new ArrayList<PointF>();
 		for (int i = 0; i < longitudeNum; i++) {
@@ -159,7 +159,7 @@ public class RadarChart extends BaseChart {
 	}
 
 
-	/**
+	*//**
 	 * <p>
 	 * calculate the points to draw the data
 	 * </p>
@@ -174,7 +174,7 @@ public class RadarChart extends BaseChart {
 	 *         result points
 	 *         </p>
 	 *         
-	 */
+	 *//*
 	protected List<PointF> getDataPoints(ARCDataLayer data) {
 		List<PointF> points = new ArrayList<PointF>();
 		for (int i = 0; i < longitudeNum; i++) {
@@ -192,14 +192,14 @@ public class RadarChart extends BaseChart {
 		return points;
 	}
 
-	/**
+	*//**
 	 * <p>
 	 * draw spider web
 	 * </p>
 	 * 
 	 * @param canvas
 	 *            Canvas
-	 */
+	 *//*
 	protected void drawSpiderWeb(Canvas canvas) {
 		Paint mPaintGridFill = new Paint();
 		mPaintGridFill.setColor(backgroundColor);
@@ -349,13 +349,13 @@ public class RadarChart extends BaseChart {
 			canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(j * 1f / latitudeNum), mPaintGridLatitude);
 		}
 	}
-	/**
+	*//**
 	 * <p>
 	 * Draw the data
 	 * </p>
 	 * 
 	 * @param canvas
-	 */
+	 *//*
 	protected void drawData(Canvas canvas) {
 		if (null != data) {
 			for (int j = 0; j < data.size(); j++) {
@@ -373,13 +373,13 @@ public class RadarChart extends BaseChart {
 				mPaintBorder.setStrokeWidth(layer.getLayerBorderWidth());
 				mPaintBorder.setAntiAlias(true);
 
-				//TODO Check. Paint to draw fonts.
+				// Check. Paint to draw fonts.
 				Paint mPaintFont = new Paint();
 				mPaintFont.setColor(Color.WHITE);
 
 				// paint to draw points
 				Paint mPaintPoint = new Paint();
-				//TODO Get point color from ARCDataEntity
+				//Get point color from ARCDataEntity
 				mPaintPoint.setColor(layer.getLayerBorderColor());
 
 				Path mPath = new Path();
@@ -404,151 +404,151 @@ public class RadarChart extends BaseChart {
 		}
 	}
 
-	/**
+	*//**
 	 * @return the data
-	 */
+	 *//*
 	public List<ARCDataLayer> getData() {
 		return data;
 	}
 
-	/**
+	*//**
 	 * @param data
 	 *            the data to set
-	 */
+	 *//*
 	public void setData(ArrayList<ARCDataLayer> data) {
 		this.data = data;
 	}
 
-	/**
+	*//**
 	 * @return the title
-	 */
+	 *//*
 	public String getTitle() {
 		return title;
 	}
 
-	/**
+	*//**
 	 * @param title
 	 *            the title to set
-	 */
+	 *//*
 	public void setTitle(String title) {
 		this.title = title;
 	}
 
-	/**
+	*//**
 	 * @return the position
-	 */
+	 *//*
 	public Point getPosition() {
 		return position;
 	}
 
-	/**
+	*//**
 	 * @param position
 	 *            the position to set
-	 */
+	 *//*
 	public void setPosition(Point position) {
 		this.position = position;
 	}
 
-	/**
+	*//**
 	 * @return the displayLongitude
-	 */
+	 *//*
 	public boolean isDisplayLongitude() {
 		return displayLongitude;
 	}
 
-	/**
+	*//**
 	 * @param displayLongitude
 	 *            the displayLongitude to set
-	 */
+	 *//*
 	public void setDisplayLongitude(boolean displayLongitude) {
 		this.displayLongitude = displayLongitude;
 	}
 
-	/**
+	*//**
 	 * @return the longitudeNum
-	 */
+	 *//*
 	public int getLongitudeNum() {
 		return longitudeNum;
 	}
 
-	/**
+	*//**
 	 * @param longitudeNum
 	 *            the longitudeNum to set
-	 */
+	 *//*
 	public void setLongitudeNum(int longitudeNum) {
 		this.longitudeNum = longitudeNum;
 	}
 
-	/**
+	*//**
 	 * @return the longitudeColor
-	 */
+	 *//*
 	public int getLongitudeColor() {
 		return longitudeColor;
 	}
 
-	/**
+	*//**
 	 * @param longitudeColor
 	 *            the longitudeColor to set
-	 */
+	 *//*
 	public void setLongitudeColor(int longitudeColor) {
 		this.longitudeColor = longitudeColor;
 	}
 
-	/**
+	*//**
 	 * @return the longitudeLength
-	 */
+	 *//*
 	public int getLongitudeLength() {
 		return longitudeLength;
 	}
 
-	/**
+	*//**
 	 * @param longitudeLength
 	 *            the longitudeLength to set
-	 */
+	 *//*
 	public void setLongitudeLength(int longitudeLength) {
 		this.longitudeLength = longitudeLength;
 	}
 
-	/**
+	*//**
 	 * @return the displayLatitude
-	 */
+	 *//*
 	public boolean isDisplayLatitude() {
 		return displayLatitude;
 	}
 
-	/**
+	*//**
 	 * @param displayLatitude
 	 *            the displayLatitude to set
-	 */
+	 *//*
 	public void setDisplayLatitude(boolean displayLatitude) {
 		this.displayLatitude = displayLatitude;
 	}
 
-	/**
+	*//**
 	 * @return the latitudeNum
-	 */
+	 *//*
 	public int getLatitudeNum() {
 		return latitudeNum;
 	}
 
-	/**
+	*//**
 	 * @param latitudeNum
 	 *            the latitudeNum to set
-	 */
+	 *//*
 	public void setLatitudeNum(int latitudeNum) {
 		this.latitudeNum = latitudeNum;
 	}
 
-	/**
+	*//**
 	 * @return the backgroundColor
-	 */
+	 *//*
 	public int getBackgroundColor() {
 		return backgroundColor;
 	}
 
-	/**
+	*//**
 	 * @param backgroundColor the backgroundColor to set
-	 */
+	 *//*
 	public void setBackgroundColor(int backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
@@ -580,3 +580,4 @@ public class RadarChart extends BaseChart {
 		this.gridLabelPadding = gridLabelPadding;
 	}
 }
+*/
