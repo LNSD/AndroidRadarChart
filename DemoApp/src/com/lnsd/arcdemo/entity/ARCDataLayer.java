@@ -1,14 +1,14 @@
 package com.lnsd.arcdemo.entity;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-
-import android.graphics.Color;
 
 @SuppressWarnings("serial")
 public class ARCDataLayer extends TreeMap<String, Float> {
 	
-	private DataLayerParams params = new DataLayerParams();
+	private DataLayerStyle params = new DataLayerStyle();
+	private String layerTitle = "";
 	
 	/**
 	 * Empty constructor.
@@ -17,10 +17,20 @@ public class ARCDataLayer extends TreeMap<String, Float> {
 	
 	/**
 	 * Class constructor.
-	 * @param params Custom params.
+	 * @param params Custom styling.
 	 */
-	public ARCDataLayer(DataLayerParams params){
+	public ARCDataLayer(DataLayerStyle params){
 		this.params = params;
+	}
+	
+	/**
+	 * Class constructor.
+	 * @param layerTitle Layer data series title.
+	 * @param params Custom styling.
+	 */
+	public ARCDataLayer(String layerTitle, DataLayerStyle params){
+		this.params = params;
+		this.layerTitle = layerTitle;
 	}
 
 	/**
@@ -49,16 +59,34 @@ public class ARCDataLayer extends TreeMap<String, Float> {
 		}
 		return max;
 	}
+	
+	/**
+	 * Gets all the layer labels.
+	 * @return Array of labels.
+	 */
+	public String[] getLabels() {
+		ArrayList<String> labels = new ArrayList<String>();
+		for (Map.Entry<String,Float> entry: entrySet()) {
+			labels.add(entry.getKey());
+		}
+		return (String[]) labels.toArray();
+	}
 
 	/*
 	 * Getters & Setters
 	 */
 	
-	public DataLayerParams getLayerParameters() {
+	public DataLayerStyle getLayerStyle() {
 		return params;
 	}
-	public void setLayerParameters(DataLayerParams params) {
+	public void setLayerStyle(DataLayerStyle params) {
 		this.params = params;
+	}
+	public String getLayerTitle() {
+		return layerTitle;
+	}
+	public void setLayerTitle(String layerTitle) {
+		this.layerTitle = layerTitle;
 	}
 
 }

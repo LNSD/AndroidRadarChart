@@ -195,7 +195,7 @@ public class RadarGrid extends ChartGridView {
 				(int) (cHeight / 2f));
 		Log.v(TAG, "gridOrigin = "+gridOrigin);
 
-
+				
 		// Draw longitude grid lines
 		if(lonAxis){
 			pList = getGridPoints(1);
@@ -309,7 +309,7 @@ public class RadarGrid extends ChartGridView {
 		mPaintGridBorder.setStyle(Style.STROKE);
 		mPaintGridBorder.setStrokeWidth(
 				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
-		//mPaintGridBorder.setAntiAlias(true);
+		mPaintGridBorder.setAntiAlias(true);
 		return mPaintGridBorder;
 	}
 	private Paint getPaintGridLatitude() {
