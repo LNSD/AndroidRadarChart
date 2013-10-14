@@ -27,21 +27,27 @@ public class ARCDemoActivity extends Activity {
 		
 		GridLayerStyle gStyle = new GridLayerStyle();
 		gStyle.setGridChartType(GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE);
-		gStyle.setBackgroundColor(Color.YELLOW);
-		gStyle.setGridBorderColor(Color.RED);
+		gStyle.setBackgroundColor(Color.TRANSPARENT);
+		gStyle.setGridBorderColor(Color.parseColor("#256A91"));
 		gStyle.setGridBorderStrokeWidth(10f);
-		gStyle.setGridLatitudeColor(Color.parseColor("#34495e"));
-		gStyle.setGridLongitudeColor(Color.GRAY);
-		gStyle.setGridLabelColor(Color.parseColor("#e67e22"));
-		gStyle.setGridStrokeWidth(5f);
-		gStyle.setGridLabelPadding(30);
+		
+		gStyle.setGridLatitudeColor(Color.parseColor("#87CDB9"));
+		gStyle.setGridLongitudeColor(Color.parseColor("#87CDB9"));
+		gStyle.setGridStrokeWidth(2f);
+		
+		gStyle.setGridLabelColor(Color.parseColor("#F04132"));
+		gStyle.setGridLabelPadding(40);
 		gStyle.setGridLabelSize(40f);
+		
+		gStyle.setGridScaleColor(Color.parseColor("#F04132"));
+		gStyle.setGridScaleSize(25f);
+		gStyle.setGridScaleLabelPadding(2f);
 		chart.setGridStyle(gStyle);
 		
 		DataLayerStyle p = new DataLayerStyle();
-		p.setLayerBorderColor(Color.BLUE);
+		p.setLayerBorderColor(Color.parseColor("#8AE659"));
 		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
-		p.setLayerFillColor(Color.BLUE);
+		p.setLayerFillColor(-1);
 		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data1 = new ARCDataLayer(p);
@@ -54,9 +60,9 @@ public class ARCDemoActivity extends Activity {
 		data1.put("F", 5f);
 		
 		p = new DataLayerStyle();
-		p.setLayerBorderColor(Color.RED);
+		p.setLayerBorderColor(Color.YELLOW);
 		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
-		p.setLayerFillColor(Color.RED);
+		p.setLayerFillColor(-1);
 		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data2 = new ARCDataLayer(p);
@@ -69,27 +75,28 @@ public class ARCDemoActivity extends Activity {
 		data2.put("F", 3f);
 		
 		p = new DataLayerStyle();
-		p.setLayerBorderColor(Color.YELLOW);
+		p.setLayerBorderColor(Color.parseColor("#F04132"));
 		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
-		p.setLayerFillColor(Color.YELLOW);
+		p.setLayerFillColor(-1);
 		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data3 = new ARCDataLayer(p);
 
-		data3.put("A", 3f);
-		data3.put("B", 7f);
-		data3.put("C", 12f);
-		data3.put("D", 7f);
+		data3.put("A", 12f);
+		data3.put("B", 3f);
+		data3.put("C", 9f);
+		data3.put("D", 3f);
 
 		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data2));
 		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data3));
 		
-		data3.put("E", 12f); 
+		data3.put("E", 9f); 
 		data3.put("F", 3f);
 		
 		ArrayList<ARCDataLayer> data = new ArrayList<ARCDataLayer>();
 		data.add(data1);
 		data.add(data2);
+		data.add(data3);
 
 		try {
 			chart.setData((ARCDataLayer[]) data.toArray(new ARCDataLayer[data.size()]));

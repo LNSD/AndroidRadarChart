@@ -163,12 +163,43 @@ public class RadarGrid extends ChartGridView {
 				(int) (cHeight / 2f));
 		Log.v(TAG, "gridOrigin = "+gridOrigin);
 
-		// Draw latitude grid lines. 
+
+		// Draw latitude grid lines: fill-background
 		if(style.isLatAxis()){		
 			switch (style.getGridChartType()) {
 			case GridLayerStyle.ARC_RADAR_GRIDTYPE:
-				// Draw fill-background & Grid border
 				canvas.drawCircle(gridOrigin.x, gridOrigin.y, lonLength, getPaintGridFill());
+				break;
+			case GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE:
+				if(pList == null) pList = getGridPoints(1);
+
+				for (int i = 0; i < lonNum; i++) {
+					PointF pt = pList.get(i);
+					if (i == 0) {
+						mPath.moveTo(pt.x, pt.y);
+					} else {
+						mPath.lineTo(pt.x, pt.y);
+					}
+				}
+				mPath.close();
+				if(style.getBackgroundColor() != Color.TRANSPARENT) canvas.drawPath(mPath, getPaintGridFill());	
+				break;
+			}
+		}
+
+		// Draw longitude grid lines
+		if(style.isLonAxis()){
+			pList = getGridPoints(1);
+			for (int i = 0; i < lonNum; i++) {
+				PointF pt = pList.get(i);
+				canvas.drawLine(gridOrigin.x, gridOrigin.y, pt.x, pt.y, getPaintGridLongitude());
+			}
+		}
+
+		// Draw latitude grid lines: Grid border & Inner lines
+		if(style.isLatAxis()){		
+			switch (style.getGridChartType()) {
+			case GridLayerStyle.ARC_RADAR_GRIDTYPE:
 				canvas.drawCircle(gridOrigin.x, gridOrigin.y, lonLength, getPaintGridBorder());
 
 				// Draw inner latitude lines
@@ -179,25 +210,10 @@ public class RadarGrid extends ChartGridView {
 				break;
 
 			case GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE:
-				if(pList == null) pList = getGridPoints(1);
-
-				mPath.setFillType(Path.FillType.WINDING);
-				// Draw fill-background & Grid border
-				for (int i = 0; i < lonNum; i++) {
-					PointF pt = pList.get(i);
-					if (i == 0) {
-						mPath.moveTo(pt.x, pt.y);
-					} else {
-						mPath.lineTo(pt.x, pt.y);
-					}
-				}
-				mPath.close();
-				if(style.getBackgroundColor() != Color.TRANSPARENT)
-					canvas.drawPath(mPath, getPaintGridFill());
 				canvas.drawPath(mPath, getPaintGridBorder());
 				mPath.reset();
 
-				// Draw inner latitude lines
+				// Draw inner latitude lines 
 				for(int j = 1; j < latNum; j++){
 					pList = getGridPoints(j * 1f / latNum);
 
@@ -217,19 +233,10 @@ public class RadarGrid extends ChartGridView {
 			}
 		}
 
-		// Draw longitude grid lines
-		if(style.isLonAxis()){
-			pList = getGridPoints(1);
-			for (int i = 0; i < lonNum; i++) {
-				PointF pt = pList.get(i);
-				canvas.drawLine(gridOrigin.x, gridOrigin.y, pt.x, pt.y, getPaintGridLongitude());
-			}
-		}
-
 		// Draw lonAxis scale values
 		if(style.isLonAxisScale()){
-			for (int k = 1; k < latNum; k++) {
-				String val = String.format("%.2f", (float) k * maxValue/latNum);
+			for (int k = 1; k <= latNum; k++) {
+				String val = String.format("%.1f", (float) k * maxValue/latNum);
 
 				float offsetX = (float) (gridOrigin.x + style.getGridScaleLabelPadding());
 				float offsetY = (float) (gridOrigin.y - k * lonLength/latNum - style.getGridScaleLabelPadding());
