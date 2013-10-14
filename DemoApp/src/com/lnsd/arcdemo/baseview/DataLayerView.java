@@ -1,4 +1,4 @@
-package com.lnsd.arcdemo.view;
+package com.lnsd.arcdemo.baseview;
 
 import android.content.Context;
 import android.util.AttributeSet;

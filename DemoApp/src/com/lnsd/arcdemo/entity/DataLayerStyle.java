@@ -14,6 +14,10 @@ public class DataLayerStyle {
 	private int layerFillColor = -1;
 	private int layerFillAlpha = DEFAULT_LFILL_ALPHA;
 	
+	/*
+	 * Getters & setters
+	 */
+	
 	public int getLayerBorderColor() {
 		return layerBorderColor;
 	}

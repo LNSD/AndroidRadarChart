@@ -4,7 +4,6 @@ import java.util.Map;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
@@ -12,6 +11,7 @@ import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 
+import com.lnsd.arcdemo.baseview.DataLayerView;
 import com.lnsd.arcdemo.entity.ARCDataLayer;
 import com.lnsd.arcdemo.entity.DataLayerStyle;
 
@@ -98,27 +98,6 @@ public class RadarDataLayer extends DataLayerView {
 	 */
 	
 	private Path mPath = new Path();
-	
-			// TODO Delete this code. Debug purpose only.
-			  {
-				this.cLayerParams = new DataLayerStyle();
-				cLayerParams.setLayerBorderColor(Color.BLUE);
-				cLayerParams.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
-				cLayerParams.setLayerFillColor(Color.BLUE);
-				cLayerParams.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
-		
-				this.data = new ARCDataLayer(cLayerParams);
-		
-				data.put("A", 2f);
-				data.put("B", 10f);
-				data.put("C", 5f);
-				data.put("D", 2f);
-				data.put("E", 10f);
-				data.put("F", 5f);
-				
-				this.maxValue = data.getMaxValue();
-				this.lonNum = data.size();
-			}
 	
 	/*
 	 * (non-Javadoc)

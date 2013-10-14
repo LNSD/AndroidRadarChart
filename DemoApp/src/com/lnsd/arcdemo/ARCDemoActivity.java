@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.lnsd.arcdemo.entity.ARCDataLayer;
-import com.lnsd.arcdemo.entity.DataLayerParams;
+import com.lnsd.arcdemo.entity.DataLayerStyle;
+import com.lnsd.arcdemo.entity.GridLayerStyle;
 import com.lnsd.arcdemo.view.RadarChart;
+import com.lnsd.arcdemo.view.RadarGrid;
 
 public class ARCDemoActivity extends Activity {
 
@@ -20,24 +22,27 @@ public class ARCDemoActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.demo_arclayout);
 
-
 		RadarChart chart = (RadarChart)findViewById(R.id.arcChart);
-		//chart.setChartGridType(RadarChart.SPIDER_WEB_CHART);
-		//chart.setGridLabelPadding(-40f);
-		//chart.setBackgroundColor(Color.TRANSPARENT);
-		//chart.setGridBorderColor(Color.RED);
-		//chart.setGridBorderStrokeWidth(30f);
-		//chart.setGridLatitudeColor(Color.parseColor("#34495e"));
-		//chart.setGridLongitudeColor(Color.BLUE);
-		//chart.setGridLabelColor(Color.parseColor("#e67e22"));
-		//chart.setGridStrokeWidth(40f);
-		//chart.setGridLabelSize(40f);
-
-		DataLayerParams p = new DataLayerParams();
+		chart.setLatitudeNum(7);
+		
+		GridLayerStyle gStyle = new GridLayerStyle();
+		gStyle.setGridChartType(GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE);
+		gStyle.setBackgroundColor(Color.YELLOW);
+		gStyle.setGridBorderColor(Color.RED);
+		gStyle.setGridBorderStrokeWidth(10f);
+		gStyle.setGridLatitudeColor(Color.parseColor("#34495e"));
+		gStyle.setGridLongitudeColor(Color.GRAY);
+		gStyle.setGridLabelColor(Color.parseColor("#e67e22"));
+		gStyle.setGridStrokeWidth(5f);
+		gStyle.setGridLabelPadding(30);
+		gStyle.setGridLabelSize(40f);
+		chart.setGridStyle(gStyle);
+		
+		DataLayerStyle p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.BLUE);
-		p.setLayerBorderWidth(DataLayerParams.DEFAULT_LBORDER_WIDTH);
+		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
 		p.setLayerFillColor(Color.BLUE);
-		p.setLayerFillAlpha(DataLayerParams.DEFAULT_LFILL_ALPHA);
+		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data1 = new ARCDataLayer(p);
 
@@ -47,11 +52,12 @@ public class ARCDemoActivity extends Activity {
 		data1.put("D", 2f);
 		data1.put("E", 10f);
 		data1.put("F", 5f);
-
+		
+		p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.RED);
-		p.setLayerBorderWidth(DataLayerParams.DEFAULT_LBORDER_WIDTH);
+		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
 		p.setLayerFillColor(Color.RED);
-		p.setLayerFillAlpha(DataLayerParams.DEFAULT_LFILL_ALPHA);
+		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data2 = new ARCDataLayer(p);
 
@@ -62,10 +68,11 @@ public class ARCDemoActivity extends Activity {
 		data2.put("E", 12f);
 		data2.put("F", 3f);
 		
+		p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.YELLOW);
-		p.setLayerBorderWidth(DataLayerParams.DEFAULT_LBORDER_WIDTH);
+		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
 		p.setLayerFillColor(Color.YELLOW);
-		p.setLayerFillAlpha(DataLayerParams.DEFAULT_LFILL_ALPHA);
+		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data3 = new ARCDataLayer(p);
 
@@ -73,18 +80,22 @@ public class ARCDemoActivity extends Activity {
 		data3.put("B", 7f);
 		data3.put("C", 12f);
 		data3.put("D", 7f);
-		//data3.put("E", 12f); // Deliberately not added to data layer 
-		//data3.put("F", 3f);  // Deliberately not added to data layer
 
 		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data2));
 		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data3));
+		
+		data3.put("E", 12f); 
+		data3.put("F", 3f);
 		
 		ArrayList<ARCDataLayer> data = new ArrayList<ARCDataLayer>();
 		data.add(data1);
 		data.add(data2);
 
-		chart.setData(data);
-		chart.setLongitudeNum(6);
-		chart.setLatitudeNum(10);
+		try {
+			chart.setData((ARCDataLayer[]) data.toArray(new ARCDataLayer[data.size()]));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+			
 	}
 }

@@ -69,7 +69,7 @@ public class ARCDataLayer extends TreeMap<String, Float> {
 		for (Map.Entry<String,Float> entry: entrySet()) {
 			labels.add(entry.getKey());
 		}
-		return (String[]) labels.toArray();
+		return (String[]) labels.toArray(new String[labels.size()]);
 	}
 
 	/*

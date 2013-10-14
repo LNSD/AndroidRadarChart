@@ -3,6 +3,9 @@ package com.lnsd.arcdemo.view;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.lnsd.arcdemo.baseview.ChartGridView;
+import com.lnsd.arcdemo.entity.GridLayerStyle;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -31,39 +34,17 @@ public class RadarGrid extends ChartGridView {
 	 * Constants
 	 */	
 
-	// Chart types
-	public static final int ARC_SPIDER_WEB_GRIDTYPE = 0;
-	public static final int ARC_RADAR_GRIDTYPE = 1;
-
 	// Default values
 	public static final int DEFAULT_LONGITUDE_LENGTH = 80;
 	public static final int DEFAULT_LATITUDE_NUM = 4;
 	public static final int DEFAULT_LONGITUDE_NUM = 4;
 	public static final Point DEFAULT_ORIGIN_POSITION = new Point(0, 0);
 
-	public static final int DEFAULT_GBACKGROUND_COLOR = Color.TRANSPARENT;
-	public static final int DEFAULT_GLATITUDE_COLOR = Color.BLACK;
-	public static final int DEFAULT_GLONGITUDE_COLOR = Color.BLACK;
-	public static final float DEFAULT_GSTROKE_WIDTH = 2f;
-
-	public static final int DEFAULT_GLABEL_COLOR = Color.BLACK;
-	public static final float DEFAULT_GLABEL_SIZE = 12f;
-	public static final float DEFAULT_GLABEL_PADDING = 16f;	
-
-	public static final float DEFAULT_GSCALE_SIZE = 17f;
-	public static final float DEFAULT_GSCALE_PADDING = 4f;	
-
 	/*
 	 * Variables
 	 */
 
 	// Grid parameters: Structure drawing
-	private int gridChartType = ARC_RADAR_GRIDTYPE;
-	private boolean latAxis = true;
-	private boolean lonAxis = true;
-	private boolean lonAxisScale = true;
-	private boolean labels = true;
-
 	private int lonNum = DEFAULT_LONGITUDE_NUM;
 	private int latNum = DEFAULT_LATITUDE_NUM;
 
@@ -73,20 +54,7 @@ public class RadarGrid extends ChartGridView {
 	private int lonLength = DEFAULT_LONGITUDE_LENGTH;	
 	private Point gridOrigin = DEFAULT_ORIGIN_POSITION;
 
-	// Grid parameters: Grid styling
-	private int backgroundColor = DEFAULT_GBACKGROUND_COLOR;
-	private int gridBorderColor = -1;
-	private int gridLatitudeColor = DEFAULT_GLATITUDE_COLOR;
-	private int gridLongitudeColor = DEFAULT_GLONGITUDE_COLOR;
-	private float gridStrokeWidth = DEFAULT_GSTROKE_WIDTH;
-	private float gridBorderStrokeWidth = -1;
-
-	private int gridLabelColor = DEFAULT_GLABEL_COLOR;
-	private float gridLabelSize = DEFAULT_GLABEL_SIZE;
-	private float gridLabelPadding = DEFAULT_GLABEL_PADDING;
-	private int gridScaleColor = -1;
-	private float gridScaleSize = DEFAULT_GSCALE_SIZE;
-	private float gridScaleLabelPadding = DEFAULT_GSCALE_PADDING;
+	private GridLayerStyle style;
 
 	/*
 	 * Constructors
@@ -114,14 +82,14 @@ public class RadarGrid extends ChartGridView {
 		this.labelsArray = labelsArray;
 		initView(DEFAULT_LONGITUDE_LENGTH);
 	}
-	public RadarGrid(Context cnt, int lonNum, int lonLength, int latNum, float maxValue, String[] labelsArray){
+	public RadarGrid(Context cnt, int lonNum, int latNum, float maxValue, String[] labelsArray, GridLayerStyle style){
 		super(cnt);
 		this.maxValue = maxValue;
 		this.lonNum = lonNum;
 		this.latNum = latNum;
 		this.maxValue = maxValue;
 		this.labelsArray = labelsArray;
-		this.lonLength = lonLength;
+		this.style = style;
 	}
 
 	/*
@@ -195,20 +163,10 @@ public class RadarGrid extends ChartGridView {
 				(int) (cHeight / 2f));
 		Log.v(TAG, "gridOrigin = "+gridOrigin);
 
-				
-		// Draw longitude grid lines
-		if(lonAxis){
-			pList = getGridPoints(1);
-			for (int i = 0; i < lonNum; i++) {
-				PointF pt = pList.get(i);
-				canvas.drawLine(gridOrigin.x, gridOrigin.y, pt.x, pt.y, getPaintGridLongitude());
-			}
-		}
-
-		// Draw latitude grid lines
-		if(latAxis){		
-			switch (gridChartType) {
-			case ARC_RADAR_GRIDTYPE:
+		// Draw latitude grid lines. 
+		if(style.isLatAxis()){		
+			switch (style.getGridChartType()) {
+			case GridLayerStyle.ARC_RADAR_GRIDTYPE:
 				// Draw fill-background & Grid border
 				canvas.drawCircle(gridOrigin.x, gridOrigin.y, lonLength, getPaintGridFill());
 				canvas.drawCircle(gridOrigin.x, gridOrigin.y, lonLength, getPaintGridBorder());
@@ -220,7 +178,7 @@ public class RadarGrid extends ChartGridView {
 				}
 				break;
 
-			case ARC_SPIDER_WEB_GRIDTYPE:
+			case GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE:
 				if(pList == null) pList = getGridPoints(1);
 
 				mPath.setFillType(Path.FillType.WINDING);
@@ -234,7 +192,7 @@ public class RadarGrid extends ChartGridView {
 					}
 				}
 				mPath.close();
-				if(backgroundColor != Color.TRANSPARENT)
+				if(style.getBackgroundColor() != Color.TRANSPARENT)
 					canvas.drawPath(mPath, getPaintGridFill());
 				canvas.drawPath(mPath, getPaintGridBorder());
 				mPath.reset();
@@ -259,20 +217,29 @@ public class RadarGrid extends ChartGridView {
 			}
 		}
 
-		// Draw lonAxis scale values
-		if(lonAxisScale){
-			for (int k = 1; k < latNum; k++) {
-				String val = String.valueOf((float) k * maxValue/latNum);
+		// Draw longitude grid lines
+		if(style.isLonAxis()){
+			pList = getGridPoints(1);
+			for (int i = 0; i < lonNum; i++) {
+				PointF pt = pList.get(i);
+				canvas.drawLine(gridOrigin.x, gridOrigin.y, pt.x, pt.y, getPaintGridLongitude());
+			}
+		}
 
-				float offsetX = (float) (gridOrigin.x + gridScaleLabelPadding);
-				float offsetY = (float) (gridOrigin.y - k * lonLength/latNum - gridScaleLabelPadding);
+		// Draw lonAxis scale values
+		if(style.isLonAxisScale()){
+			for (int k = 1; k < latNum; k++) {
+				String val = String.format("%.2f", (float) k * maxValue/latNum);
+
+				float offsetX = (float) (gridOrigin.x + style.getGridScaleLabelPadding());
+				float offsetY = (float) (gridOrigin.y - k * lonLength/latNum - style.getGridScaleLabelPadding());
 
 				canvas.drawText(val, offsetX, offsetY, getPaintGScaleFont());
 			}
 		}
 
 		// Draw grid labels
-		if(labelsArray != null && labels){
+		if(labelsArray != null && style.isLabels()){
 			if(labelsArray.length != lonNum) 
 				throw new RuntimeException("Labels array length not matches longitude lines number.");
 			else
@@ -283,9 +250,9 @@ public class RadarGrid extends ChartGridView {
 					getPaintGLabelFont().getTextBounds(label, 0, label.length(), mRect);
 
 					float offsetX = (float) (gridOrigin.x - mRect.width()/2
-							- (lonLength + gridLabelPadding) * Math.sin(j * 2 * Math.PI / lonNum) );
+							- (lonLength + style.getGridLabelPadding()) * Math.sin(j * 2 * Math.PI / lonNum) );
 					float offsetY = (float) (gridOrigin.y + mRect.height()/2
-							- (lonLength + gridLabelPadding) * Math.cos(j * 2 * Math.PI / lonNum));
+							- (lonLength + style.getGridLabelPadding()) * Math.cos(j * 2 * Math.PI / lonNum));
 
 					canvas.drawText(label, offsetX, offsetY, getPaintGLabelFont());
 				}
@@ -298,45 +265,42 @@ public class RadarGrid extends ChartGridView {
 
 	private Paint getPaintGridFill() {
 		Paint mPaintGridFill = new Paint();
-		mPaintGridFill.setColor(backgroundColor);
+		mPaintGridFill.setColor(style.getBackgroundColor());
 		mPaintGridFill.setAntiAlias(true);
 		return mPaintGridFill;
 	}
 	private Paint getPaintGridBorder() {
 		Paint mPaintGridBorder = new Paint();
-		mPaintGridBorder.setColor(
-				(gridBorderColor==-1)? gridLatitudeColor:gridBorderColor);
+		mPaintGridBorder.setColor(style.getGridBorderColor());
 		mPaintGridBorder.setStyle(Style.STROKE);
-		mPaintGridBorder.setStrokeWidth(
-				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
+		mPaintGridBorder.setStrokeWidth(style.getGridBorderStrokeWidth());
 		mPaintGridBorder.setAntiAlias(true);
 		return mPaintGridBorder;
 	}
 	private Paint getPaintGridLatitude() {
 		Paint mPaintGridLatitude = new Paint();
-		mPaintGridLatitude.setColor(gridLatitudeColor);
+		mPaintGridLatitude.setColor(style.getGridLatitudeColor());
 		mPaintGridLatitude.setStyle(Style.STROKE);
-		mPaintGridLatitude.setStrokeWidth(gridStrokeWidth);
+		mPaintGridLatitude.setStrokeWidth(style.getGridStrokeWidth());
 		mPaintGridLatitude.setAntiAlias(true);
 		return mPaintGridLatitude;
 	}
 	private Paint getPaintGridLongitude() {
 		Paint mPaintGridLongitude = new Paint();
-		mPaintGridLongitude.setColor(gridLongitudeColor);
-		mPaintGridLongitude.setStrokeWidth(gridStrokeWidth);
+		mPaintGridLongitude.setColor(style.getGridLongitudeColor());
+		mPaintGridLongitude.setStrokeWidth(style.getGridStrokeWidth());
 		return mPaintGridLongitude;
 	}
 	private Paint getPaintGLabelFont() {
 		Paint mPaintGLabelFont = new Paint();
-		mPaintGLabelFont.setColor(gridLabelColor);
-		mPaintGLabelFont.setTextSize(gridLabelSize);
+		mPaintGLabelFont.setColor(style.getGridLabelColor());
+		mPaintGLabelFont.setTextSize(style.getGridLabelSize());
 		return mPaintGLabelFont;
 	}
 	private Paint getPaintGScaleFont() {
 		Paint mPaintGScaleFont = new Paint();
-		mPaintGScaleFont.setColor(
-				(gridScaleColor==-1)? gridLabelColor:gridScaleColor);
-		mPaintGScaleFont.setTextSize(gridScaleSize);
+		mPaintGScaleFont.setColor(style.getGridScaleColor());
+		mPaintGScaleFont.setTextSize(style.getGridScaleSize());
 		return mPaintGScaleFont;
 	}
 
@@ -347,23 +311,23 @@ public class RadarGrid extends ChartGridView {
 
 	// Grid form setters
 	public void setGridChartType(int gridChartType) {
-		this.gridChartType = gridChartType;
+		style.setGridChartType(gridChartType);
 		invalidate();
 	}
 	public void showLatAxis(boolean latAxis) {
-		this.latAxis = latAxis;
+		style.showLatAxis(latAxis);
 		invalidate();
 	}
 	public void showLonAxis(boolean lonAxis) {
-		this.lonAxis = lonAxis;
+		style.showLonAxis(lonAxis);
 		invalidate();
 	}
 	public void showLonAxisScale(boolean lonAxisScale) {
-		this.lonAxisScale = lonAxisScale;
+		style.showLonAxisScale(lonAxisScale);
 		invalidate();
 	}
 	public void showLabels(boolean labels) {
-		this.labels = labels;
+		style.showLabels(labels);
 		invalidate();
 	}
 	public void setLonNum(int lonNum) {
@@ -384,52 +348,60 @@ public class RadarGrid extends ChartGridView {
 	}
 
 	// Style setters
+	public void setGridStyle(GridLayerStyle style){
+		this.style = style;
+		invalidate();
+	}
+	public GridLayerStyle getGridStyle(){
+		return style;
+	}
+
 	public void setBackgroundColor(int backgroundColor) {
-		this.backgroundColor = backgroundColor;
+		style.setBackgroundColor(backgroundColor);
 		invalidate();
 	}
 	public void setGridBorderColor(int gridBorderColor) {
-		this.gridBorderColor = gridBorderColor;
+		style.setGridBorderColor(gridBorderColor);
 		invalidate();
 	}
 	public void setGridLatitudeColor(int gridLatitudeColor) {
-		this.gridLatitudeColor = gridLatitudeColor;
+		style.setGridLatitudeColor(gridLatitudeColor);
 		invalidate();
 	}
 	public void setGridLongitudeColor(int gridLongitudeColor) {
-		this.gridLongitudeColor = gridLongitudeColor;
+		style.setGridLongitudeColor(gridLongitudeColor);
 		invalidate();
 	}
 	public void setGridStrokeWidth(float gridStrokeWidth) {
-		this.gridStrokeWidth = gridStrokeWidth;
+		style.setGridStrokeWidth(gridStrokeWidth);
 		invalidate();
 	}
 	public void setGridBorderStrokeWidth(float gridBorderStrokeWidth) {
-		this.gridBorderStrokeWidth = gridBorderStrokeWidth;
+		style.setGridBorderStrokeWidth(gridBorderStrokeWidth);
 		invalidate();
 	}
 	public void setGridLabelColor(int gridLabelColor) {
-		this.gridLabelColor = gridLabelColor;
+		style.setGridLabelColor(gridLabelColor);
 		invalidate();
 	}
 	public void setGridLabelSize(float gridLabelSize) {
-		this.gridLabelSize = gridLabelSize;
+		style.setGridLabelSize(gridLabelSize);
 		invalidate();
 	}
 	public void setGridLabelPadding(float gridLabelPadding) {
-		this.gridLabelPadding = gridLabelPadding;
+		style.setGridLabelPadding(gridLabelPadding);
 		invalidate();
 	}
 	public void setGridScaleColor(int gridScaleColor) {
-		this.gridScaleColor = gridScaleColor;
+		style.setGridScaleColor(gridScaleColor);
 		invalidate();
 	}
 	public void setGridScaleSize(float gridScaleSize) {
-		this.gridScaleSize = gridScaleSize;
+		style.setGridScaleSize(gridScaleSize);
 		invalidate();
 	}
 	public void setGridScaleLabelPadding(float gridScaleLabelPadding) {
-		this.gridScaleLabelPadding = gridScaleLabelPadding;
+		style.setGridScaleLabelPadding(gridScaleLabelPadding);
 		invalidate();
 	}
 }
