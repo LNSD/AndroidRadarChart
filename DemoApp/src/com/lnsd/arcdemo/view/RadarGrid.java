@@ -146,23 +146,18 @@ public class RadarGrid extends ChartGridView {
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		Log.i(TAG,"onDraw called");
 
 		// Get canvas measurements
 		int cHeight = this.getHeight();
 		int cWidth = this.getWidth();			
-		Log.v(TAG, "Width/Height = "+cWidth+'/'+cHeight);
 
 		// Calculate longitude length TODO Check lonLength calc.
 		lonLength = (int) ((Math.min(cHeight, cWidth) / 2f) * 0.8);
-		Log.v(TAG, "lonLength = "+lonLength);
 
 		// Calculate graph origin
 		gridOrigin.set(
 				(int) (cWidth / 2f),
 				(int) (cHeight / 2f));
-		Log.v(TAG, "gridOrigin = "+gridOrigin);
-
 
 		// Draw latitude grid lines: fill-background
 		if(style.isLatAxis()){		

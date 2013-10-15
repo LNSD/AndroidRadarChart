@@ -22,7 +22,8 @@ public class ARCDemoActivity extends Activity {
 		setContentView(R.layout.demo_arclayout);
 
 		RadarChart chart = (RadarChart)findViewById(R.id.arcChart);
-		chart.setLatitudeNum(7);
+		chart.setLatitudeNum(5);
+		chart.simultaneousLayersAllowed(2);
 		
 		GridLayerStyle gStyle = new GridLayerStyle();
 		gStyle.setGridChartType(GridLayerStyle.ARC_SPIDER_WEB_GRIDTYPE);
@@ -58,7 +59,7 @@ public class ARCDemoActivity extends Activity {
 		data1.put("E", 10f);
 		data1.put("F", 5f);
 		
-		data1.animateData(1000);		
+		data1.animateData(5000); // ms		
 		
 		p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.YELLOW);
@@ -88,8 +89,8 @@ public class ARCDemoActivity extends Activity {
 		data3.put("C", 9f);
 		data3.put("D", 3f);
 
-		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data2));
-		Log.d(TAG, "Compatiblility(data1, data2) = "+data1.check(data3));
+		Log.i(TAG, "Compatiblility(data1, data2) = "+data1.check(data2));
+		Log.i(TAG, "Compatiblility(data1, data2) = "+data1.check(data3));
 		
 		data3.put("E", 9f); 
 		data3.put("F", 3f);
@@ -106,8 +107,10 @@ public class ARCDemoActivity extends Activity {
 			e.printStackTrace();
 		}
 		
+		
+		chart.removeData(data2);
 		chart.startAnimation();
-		chart.simultaneousLayersAllowed(2);
+		
 			
 	}
 }

@@ -39,28 +39,9 @@ public abstract class ChartGridView extends View {
 	 */
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		logSpec(MeasureSpec.getMode(widthMeasureSpec));
-		Log.d(TAG, "size:" + MeasureSpec.getSize(widthMeasureSpec));
 
 		setMeasuredDimension(getImprovedDefaultWidth(widthMeasureSpec),
 				getImprovedDefaultHeight(heightMeasureSpec));
-	}
-
-	//Just a utility method to see what the spec is
-	private void logSpec(int specMode) {
-
-		if (specMode == MeasureSpec.UNSPECIFIED) {
-			Log.d(TAG,"MODE: unspecified");
-			return;
-		}
-		if (specMode == MeasureSpec.AT_MOST) {
-			Log.d(TAG,"MODE: at most");
-			return;
-		}
-		if (specMode == MeasureSpec.EXACTLY) {
-			Log.d(TAG,"MODE: exact");
-			return;
-		}
 	}
 	
 	private int getImprovedDefaultHeight(int measureSpec) {
@@ -129,7 +110,6 @@ public abstract class ChartGridView extends View {
 	@Override
 	protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-		Log.i(TAG,"onLayout()");
 	}
 
 	/*
@@ -143,6 +123,5 @@ public abstract class ChartGridView extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w,h,oldw,oldh);
-		Log.i(TAG,"onSizeChanged()");
 	}
 }

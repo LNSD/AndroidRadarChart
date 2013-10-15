@@ -113,22 +113,18 @@ public class RadarDataLayer extends DataLayerView {
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		Log.i(TAG,"onDraw called");
 
 		// Get canvas measurements
 		int cHeight = this.getHeight();
 		int cWidth = this.getWidth();			
-		Log.v(TAG, "Width/Height = "+cWidth+'/'+cHeight);
 
 		// Calculate longitude length TODO Check lonLength calc.
 		lonLength = (int) ((Math.min(cHeight, cWidth) / 2f) * 0.8);
-		Log.v(TAG, "lonLength = "+lonLength);
 
 		// Calculate graph origin
 		gridOrigin.set(
 				(int) (cWidth / 2f),
 				(int) (cHeight / 2f));
-		Log.v(TAG, "gridOrigin = "+gridOrigin);
 
 		if(data == null) throw new RuntimeException("Error: NullPointerException at data.");
 		else if(null != data) {
@@ -218,15 +214,12 @@ public class RadarDataLayer extends DataLayerView {
 	public void startAnimation(){
 		if(anim != null) this.anim.start();
 	}
-
+	
 	/*
 	 * Setters
 	 * All of them call invalidate()
 	 */
-	public void setGlobalMax(float max){
-		this.maxValue = max;
-		invalidate();
-	}
+
 	public void setData(ARCDataLayer data) {
 		this.data = data;
 		invalidate();
