@@ -3,6 +3,7 @@ package com.lnsd.arcdemo.view;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.graphics.drawable.shapes.ArcShape;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -18,9 +19,9 @@ public class RadarChart extends Chart {
 	/*
 	 * Constants
 	 */
-	
+
 	public static final String TAG = "RadarChart";
-	
+
 	public static final int DEFAULT_MAX_SIMULTANEOUS_LAYERS = 3;
 	public static final int DEFAULT_MIN_ELEMENT_DATALAYER = 3;
 
@@ -70,7 +71,7 @@ public class RadarChart extends Chart {
 	/*
 	 * Data manipulation
 	 */
-	
+
 	public void setData(ARCDataLayer ... dataIn) throws Exception{
 
 		// Iterative size check
@@ -91,8 +92,9 @@ public class RadarChart extends Chart {
 		}
 
 		// Iterate for max value
-		for (ARCDataLayer element : dataIn) {	
-			if(element.getMaxValue()>maxValue) maxValue = element.getMaxValue();	
+		for (int j = 0; j < dataIn.length; j++)  {
+			if(layersAllowed <= j) break;
+			if(dataIn[j].getMaxValue() > maxValue) maxValue = dataIn[j].getMaxValue();
 		}
 
 		// Get grid labels
@@ -106,24 +108,22 @@ public class RadarChart extends Chart {
 		for (ARCDataLayer element : dataIn){
 			dataLayers.add(element);
 		}
-		
+
 		/*
 		 * Adding views
 		 */
-		
+
 		arcGridView = setGridToChart();
 		addView(arcGridView);
-		Log.i(TAG, "Grid added to chart view.");
-		
+
 		arcDataLayerViews = new RadarDataLayer[layersAllowed];
 		for (int i = 0; i < arcDataLayerViews.length; i++) {
 			if(dataLayers.size() < i) break;
 			arcDataLayerViews[i] = setDataLayerToChart(i);
 			addView(arcDataLayerViews[i]);
-			Log.d(TAG, "View dataLayer added.");
 		}
 	}
-	
+
 	public void addData(ARCDataLayer dataIn) throws Exception {
 
 		// Size check
@@ -151,6 +151,16 @@ public class RadarChart extends Chart {
 
 		// Add layer to list
 		dataLayers.add(dataIn);
+
+		/*
+		 * Adding views
+		 */
+		if(arcGridView == null){
+			arcGridView = setGridToChart();
+			addView(arcGridView);
+		}
+
+		// TODO Complete this function.
 	}
 	public void removeData(ARCDataLayer data) {
 		if(!dataLayers.remove(data)) return;
@@ -173,25 +183,37 @@ public class RadarChart extends Chart {
 		subtitleView = null;
 		dataLayers = null;
 	}
-	
+
 	/*
 	 * View Manipulation 
 	 */
-	
+
 	private RadarGrid setGridToChart(){
 		return new RadarGrid(context, lonNum, latNum, maxValue, labels, gridStyle);
 	}
 	private RadarDataLayer setDataLayerToChart(int index){
-		return new RadarDataLayer(context, dataLayers.get(index));
+		return new RadarDataLayer(context, maxValue, dataLayers.get(index));
+	}
+
+	/*
+	 * Animation methods
+	 */
+	
+	public void startAnimation(){
+		if(arcDataLayerViews == null) return; 
+		for (int i = 0; i < arcDataLayerViews.length; i++) {
+			if(arcDataLayerViews[i] != null)
+				arcDataLayerViews[i].startAnimation();
+		}
 	}
 	
 	/*
 	 * ViewGroup overriden functions
 	 */
-	
+
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		
+
 		//Call layout() on children
 		int numOfChildren = this.getChildCount();
 		for (int i=0; i < numOfChildren; i++ ) {
@@ -199,13 +221,15 @@ public class RadarChart extends Chart {
 			child.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
 		}
 	}
-	
+
 	/*
 	 * Getters & Setters
 	 */
-	
-	public void simultaneusLayersAllowed(int num) {
-		this.layersAllowed = layersAllowed;
+
+	public void simultaneousLayersAllowed(int num) {
+		this.layersAllowed = num;
+
+		//TODO Fill this function.
 	}
 	public void setLatitudeNum(int latNum) {
 		this.latNum = latNum;

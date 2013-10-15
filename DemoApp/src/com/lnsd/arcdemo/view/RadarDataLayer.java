@@ -10,15 +10,19 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.animation.Interpolator;
 
 import com.lnsd.arcdemo.baseview.DataLayerView;
 import com.lnsd.arcdemo.entity.ARCDataLayer;
 import com.lnsd.arcdemo.entity.DataLayerStyle;
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.animation.ValueAnimator;
+import com.nineoldandroids.animation.ValueAnimator.AnimatorUpdateListener;
 
 public class RadarDataLayer extends DataLayerView {
 
 	private static final String TAG = "RadarDataLayer";
-	
+
 	/*
 	 * Constants
 	 */	
@@ -32,7 +36,9 @@ public class RadarDataLayer extends DataLayerView {
 	 */
 
 	private ARCDataLayer data;
+	private ARCDataLayer animData;
 	private DataLayerStyle cLayerParams = new DataLayerStyle();
+	private ValueAnimator anim;
 
 	private boolean points = true;
 
@@ -58,21 +64,22 @@ public class RadarDataLayer extends DataLayerView {
 		super(context, attrs, defStyle);
 		initView(DEFAULT_LONGITUDE_LENGTH);
 	}
-	
+
 	public RadarDataLayer(Context cnt, ARCDataLayer layerData){
 		super(cnt);
 		this.maxValue = layerData.getMaxValue();
 		this.cLayerParams = layerData.getLayerStyle();
 		this.lonNum = layerData.size();
 		this.data = layerData;
+		animateLayer(layerData.getInterpolator(), layerData.getDuration());
 	}
-	public RadarDataLayer(Context cnt, int lonLength, ARCDataLayer layerData){
+	public RadarDataLayer(Context cnt, float max, ARCDataLayer layerData){
 		super(cnt);
-		this.lonLength = lonLength;
-		this.maxValue = layerData.getMaxValue();
+		this.maxValue = max;
 		this.cLayerParams = layerData.getLayerStyle();
 		this.lonNum = layerData.size();
 		this.data = layerData;
+		animateLayer(layerData.getInterpolator(), layerData.getDuration());
 	}
 
 	/*
@@ -96,9 +103,9 @@ public class RadarDataLayer extends DataLayerView {
 	/*
 	 * Drawing functions
 	 */
-	
+
 	private Path mPath = new Path();
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see android.view.View#onDraw(android.graphics.Canvas)
@@ -126,30 +133,30 @@ public class RadarDataLayer extends DataLayerView {
 		if(data == null) throw new RuntimeException("Error: NullPointerException at data.");
 		else if(null != data) {
 
-			
+
 			int i = 0;
-			for (Map.Entry<String,Float> entry: data.entrySet()) {
-				
+			for (Map.Entry<String,Float> entry: (animData == null)?data.entrySet():animData.entrySet()) {
+
 				// Get values from data layer.
 				float offsetX = (float) (gridOrigin.x - entry.getValue() / maxValue
 						* lonLength * Math.sin(i * 2 * Math.PI / lonNum));
 				float offsetY = (float) (gridOrigin.y - entry.getValue() / maxValue
 						* lonLength * Math.cos(i * 2 * Math.PI / lonNum));
-				
-				
+
+
 				// Draw data layer polygon.
 				if (i == 0) {
 					mPath.moveTo(offsetX, offsetY);
 				} else {
 					mPath.lineTo(offsetX, offsetY);
 				}
-				
+
 				if(points) 
 					canvas.drawCircle(offsetX, offsetY, 3, getPaintLayerPoint());
-				
+
 				i++;
 			}
-			
+
 			mPath.close();
 			canvas.drawPath(mPath, getPaintLayerFilling());
 			canvas.drawPath(mPath, getPaintLayerBorder());
@@ -183,12 +190,43 @@ public class RadarDataLayer extends DataLayerView {
 		mPaintPoint.setStrokeWidth(cLayerParams.getLayerBorderWidth());
 		return mPaintPoint;
 	}
-	
+
+	/*
+	 *	Animation methods 
+	 */
+
+	public void animateLayer(Interpolator inter, long duration){
+		if(duration > 0){
+			this.anim = ValueAnimator.ofFloat(0, 1);
+			this.animData = new ARCDataLayer(data);
+			this.anim.setDuration(duration);
+			this.anim.setInterpolator(inter);
+
+			this.anim.addUpdateListener(new AnimatorUpdateListener() {
+
+				@Override public void onAnimationUpdate(ValueAnimator animation) {
+					float scale = (Float) animation.getAnimatedValue();
+
+					for (Map.Entry<String,Float> entry: data.entrySet()) {
+						animData.put(entry.getKey(), scale*entry.getValue());
+						invalidate();
+					}
+				}
+			});
+		}
+	}
+	public void startAnimation(){
+		if(anim != null) this.anim.start();
+	}
+
 	/*
 	 * Setters
 	 * All of them call invalidate()
 	 */
-	
+	public void setGlobalMax(float max){
+		this.maxValue = max;
+		invalidate();
+	}
 	public void setData(ARCDataLayer data) {
 		this.data = data;
 		invalidate();

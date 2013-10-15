@@ -11,7 +11,6 @@ import com.lnsd.arcdemo.entity.ARCDataLayer;
 import com.lnsd.arcdemo.entity.DataLayerStyle;
 import com.lnsd.arcdemo.entity.GridLayerStyle;
 import com.lnsd.arcdemo.view.RadarChart;
-import com.lnsd.arcdemo.view.RadarGrid;
 
 public class ARCDemoActivity extends Activity {
 
@@ -59,6 +58,8 @@ public class ARCDemoActivity extends Activity {
 		data1.put("E", 10f);
 		data1.put("F", 5f);
 		
+		data1.animateData(1000);		
+		
 		p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.YELLOW);
 		p.setLayerBorderWidth(DataLayerStyle.DEFAULT_LBORDER_WIDTH);
@@ -92,17 +93,21 @@ public class ARCDemoActivity extends Activity {
 		
 		data3.put("E", 9f); 
 		data3.put("F", 3f);
+		data3.put("F", 50f);
 		
 		ArrayList<ARCDataLayer> data = new ArrayList<ARCDataLayer>();
 		data.add(data1);
 		data.add(data2);
 		data.add(data3);
-
+		
 		try {
 			chart.setData((ARCDataLayer[]) data.toArray(new ARCDataLayer[data.size()]));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		chart.startAnimation();
+		chart.simultaneousLayersAllowed(2);
 			
 	}
 }

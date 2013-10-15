@@ -310,7 +310,7 @@ public class RadarGrid extends ChartGridView {
 		mPaintGScaleFont.setTextSize(style.getGridScaleSize());
 		return mPaintGScaleFont;
 	}
-
+	
 	/*
 	 * Setters
 	 * All of them call invalidate()
