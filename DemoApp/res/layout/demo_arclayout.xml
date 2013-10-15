@@ -8,17 +8,22 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
+       
+    	<com.lnsd.arcdemo.view.RadarChart 
+    	    android:id="@+id/arcChart"
+    	    android:layout_width="match_parent"
+    	    android:layout_height="match_parent"
+    	/>
+    <!-- 
+        <com.lnsd.arcdemo.view.RadarGrid
+            android:id="@+id/arcChart0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|center_horizontal" />
 
-    <FrameLayout
-        android:id="@+id/graphFrameLayout"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:layout_gravity="center" >
-
-        <com.lnsd.arcdemo.view.RadarChart
-            android:id="@+id/arcChart"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent" />
-    </FrameLayout>
-
+        <com.lnsd.arcdemo.view.RadarDataLayer
+            android:id="@+id/arcChart1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+	 -->
 </FrameLayout>

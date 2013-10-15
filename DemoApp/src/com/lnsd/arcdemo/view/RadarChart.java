@@ -1,583 +1,248 @@
 package com.lnsd.arcdemo.view;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.Path;
-import android.graphics.Point;
-import android.graphics.PointF;
-import android.graphics.Rect;
+import android.graphics.drawable.shapes.ArcShape;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.widget.GridView;
+import android.widget.TextView;
 
-import com.lnsd.arcdemo.entity.ARCDataEntity;
+import com.lnsd.arcdemo.baseview.Chart;
 import com.lnsd.arcdemo.entity.ARCDataLayer;
+import com.lnsd.arcdemo.entity.GridLayerStyle;
 
-public class RadarChart extends BaseChart {
+public class RadarChart extends Chart {
 
 	/*
 	 * Constants
 	 */
 
-	// Chart types
-	public static final int NO_GRID = 0;
-	public static final int SPIDER_WEB_CHART = 1;
-	public static final int RADAR_CHART = 2;
+	public static final String TAG = "RadarChart";
 
-	// Useful constants
-	public static final String DEFAULT_TITLE = "Spider Web Chart";
-	public static final boolean DEFAULT_DISPLAY_LONGITUDE = true;
-	public static final int DEFAULT_LONGITUDE_NUM = 5;
-	public static final int DEFAULT_LONGITUDE_LENGTH = 80;
-	public static final boolean DEFAULT_DISPLAY_LATITUDE = true;
-	public static final int DEFAULT_LATITUDE_NUM = 5;
-	public static final Point DEFAULT_POSITION = new Point(0, 0);
+	public static final int DEFAULT_MAX_SIMULTANEOUS_LAYERS = 3;
+	public static final int DEFAULT_MIN_ELEMENT_DATALAYER = 3;
 
-	public static final int DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
-	public static final int DEFAULT_LATITUDE_COLOR = Color.BLACK;
-	public static final int DEFAULT_LONGITUDE_COLOR = Color.BLACK;
-	public static final int DEFAULT_GLABEL_COLOR = Color.BLACK;
-	public static final float DEFAULT_GLABEL_SIZE = 32f;
-	public static final float DEFAULT_STROKE_WIDTH = 2f;
-	public static final float DEFAULT_GLABEL_PADDING = 16f;
-
-	public static final int[] COLORS = { Color.RED, Color.BLUE, Color.YELLOW, Color.GREEN};
+	public static final String EXCEPTION_WRONG_SIZE = "Not enough elements.";
+	public static final String EXCEPTION_LAYER_COMPATIBILITY = "Layer not compatible.";
 
 	/*
-	 *  Variables
+	 * Variables
 	 */
 
-	private int chartType = RADAR_CHART;
-	private List<ARCDataLayer> data;
-	private String title = DEFAULT_TITLE;
-	private Point position = DEFAULT_POSITION;
-	private boolean displayLongitude = DEFAULT_DISPLAY_LONGITUDE;
-	private int longitudeNum = DEFAULT_LONGITUDE_NUM;
-	private int longitudeColor = DEFAULT_LONGITUDE_COLOR;
-	private int longitudeLength = DEFAULT_LONGITUDE_LENGTH;
-	private boolean displayLatitude = DEFAULT_DISPLAY_LATITUDE;
-	private int latitudeNum = DEFAULT_LATITUDE_NUM;
+	private Context context;
+	private ArrayList<ARCDataLayer> dataLayers;	// Data entity layers
+	private GridLayerStyle gridStyle = new GridLayerStyle();
 
-	// Colors & stroke width
-	private int backgroundColor = DEFAULT_BACKGROUND_COLOR;
-	private int gridBorderColor = -1;
-	private int gridLatitudeColor = DEFAULT_LATITUDE_COLOR;
-	private int gridLongitudeColor = DEFAULT_LONGITUDE_COLOR;
-	private int gridLabelColor = DEFAULT_GLABEL_COLOR;
-	private float gridLabelSize = DEFAULT_GLABEL_SIZE;
-	private float gridStrokeWidth = DEFAULT_STROKE_WIDTH;
-	private float gridBorderStrokeWidth = -1;
-	private float gridLabelPadding = DEFAULT_GLABEL_PADDING;
+	private TextView titleView;					// Chart title
+	private TextView subtitleView;					// Chart subtitle
+	private RadarGrid arcGridView;					// Grid view
+	private RadarDataLayer[] arcDataLayerViews;		// Showing data layers
 
+	private boolean title = true;
+	private boolean subtitle = true;
+
+	private int layersAllowed = DEFAULT_MAX_SIMULTANEOUS_LAYERS;
+	private int lonNum = 0;
+	private int latNum = RadarGrid.DEFAULT_LATITUDE_NUM;
+
+	private String[] labels;
+	private float maxValue = 0;
+
+	/*
+	 * Constructors
+	 */
 
 	public RadarChart(Context context) {
 		super(context);
-	}
-	public RadarChart(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
+		this.context = context;
 	}
 	public RadarChart(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		this.context = context;
+	}
+	public RadarChart(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		this.context = context;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * <p>Called when is going to draw this chart<p> 
-	 * 
-	 * @param canvas
-	 * 
-	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 * Data manipulation
 	 */
-	@Override
-	protected void onDraw(Canvas canvas) {
-		super.onDraw(canvas);
 
-		// get safe rect
-		int rect = super.getHeight();
+	public void setData(ARCDataLayer ... dataIn) throws Exception{
 
-		// calculate longitude length
-		longitudeLength = (int) ((rect / 2f) * 0.8);
-
-		// calculate position TODO Check this out
-		position = new Point((int) (super.getWidth() / 2f),
-				(int) (super.getHeight() / 2f + 0.2 * longitudeLength));
-
-		// draw this chart-grid
-		switch (chartType) {
-		case 0: //No grid
-			//TODO Draw NO background grid.
-			break;
-		case 1: //Spider Web chart
-			drawSpiderWeb(canvas);
-			break;
-		default:
-			drawRadarGrid(canvas);
-			break;
-		}
-
-		// draw data on chart
-		drawData(canvas);
-	}
-
-	/**
-	 * <p>
-	 * calculate the points to draw the latitude lines
-	 * </p>
-	 * 
-	 * @param pos
-	 *            <p>
-	 *            Latitude degree. 1 = Grid border
-	 *            </p>
-	 * 
-	 * @return List<PointF>
-	 *         <p>
-	 *         result points
-	 *         </p>
-	 *         
-	 */
-	protected List<PointF> getWebAxisPoints(float pos) {
-		List<PointF> points = new ArrayList<PointF>();
-		for (int i = 0; i < longitudeNum; i++) {
-			PointF pt = new PointF();
-			float offsetX = (float) (position.x - longitudeLength * pos
-					* Math.sin(i * 2 * Math.PI / longitudeNum));
-			float offsetY = (float) (position.y - longitudeLength * pos
-					* Math.cos(i * 2 * Math.PI / longitudeNum));
-			pt.set(offsetX, offsetY);
-
-			points.add(pt);
-		}
-		return points;
-	}
-
-	protected float getRadarRadiusPoints(float pos) {		
-		return (float) longitudeLength * pos;
-	}
-
-
-	/**
-	 * <p>
-	 * calculate the points to draw the data
-	 * </p>
-
-	 * @param data
-	 *            <p>
-	 *            data for calculation
-	 *            </p>
-	 * 
-	 * @return List<PointF>
-	 *         <p>
-	 *         result points
-	 *         </p>
-	 *         
-	 */
-	protected List<PointF> getDataPoints(ARCDataLayer data) {
-		List<PointF> points = new ArrayList<PointF>();
-		for (int i = 0; i < longitudeNum; i++) {
-			PointF pt = new PointF();
-			float offsetX = (float) (position.x - data.get(i).getValue() / 10f
-					* longitudeLength
-					* Math.sin(i * 2 * Math.PI / longitudeNum));
-			float offsetY = (float) (position.y - data.get(i).getValue() / 10f
-					* longitudeLength
-					* Math.cos(i * 2 * Math.PI / longitudeNum));
-			pt.set(offsetX, offsetY);
-
-			points.add(pt);
-		}
-		return points;
-	}
-
-	/**
-	 * <p>
-	 * draw spider web
-	 * </p>
-	 * 
-	 * @param canvas
-	 *            Canvas
-	 */
-	protected void drawSpiderWeb(Canvas canvas) {
-		Paint mPaintGridFill = new Paint();
-		mPaintGridFill.setColor(backgroundColor);
-		mPaintGridFill.setAntiAlias(true);
-
-		Paint mPaintGridBorder = new Paint();
-		mPaintGridBorder.setColor(
-				(gridBorderColor==-1)? gridLatitudeColor:gridBorderColor);
-		mPaintGridBorder.setStyle(Style.STROKE);
-		mPaintGridBorder.setStrokeWidth(
-				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
-		mPaintGridBorder.setAntiAlias(true);
-
-		Paint mPaintGridLatitude = new Paint();
-		mPaintGridLatitude.setColor(gridLatitudeColor);
-		mPaintGridLatitude.setStyle(Style.STROKE);
-		mPaintGridLatitude.setStrokeWidth(gridStrokeWidth);
-		mPaintGridLatitude.setAntiAlias(true);
-
-		Paint mPaintGridLongitude = new Paint();
-		mPaintGridLongitude.setColor(gridLongitudeColor);
-		mPaintGridLongitude.setStrokeWidth(gridStrokeWidth);
-
-		Paint mPaintLabelFont = new Paint();
-		mPaintLabelFont.setColor(gridLabelColor);
-		mPaintLabelFont.setTextSize(gridLabelSize);
-
-		Path mPath = new Path();
-		List<PointF> pointList = getWebAxisPoints(1);
-
-		//Draw fill-background
-		if (data != null) {
-			for (int i = 0; i < pointList.size(); i++) {
-				PointF pt = pointList.get(i);
-				if (i == 0) {
-					mPath.moveTo(pt.x, pt.y);
-				} else {
-					mPath.lineTo(pt.x, pt.y);
-				}
-
-				// Draw labels. Label defined by the first list.
-				String title = data.get(0).get(i).getLabel();
-
-				Rect labelRect = new Rect();
-				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
-
-				float offsetX = (float) (position.x - labelRect.width()/2
-						- (longitudeLength + gridLabelPadding) * Math.sin(i * 2 * Math.PI / longitudeNum) );
-				float offsetY = (float) (position.y + labelRect.height()/2
-						- (longitudeLength + gridLabelPadding) * Math.cos(i * 2 * Math.PI / longitudeNum));
-
-				canvas.drawText(title, offsetX, offsetY, mPaintLabelFont);
+		// Iterative size check
+		for (ARCDataLayer element : dataIn) {	
+			if(element.size() < DEFAULT_MIN_ELEMENT_DATALAYER) {
+				throw new Exception(EXCEPTION_WRONG_SIZE);
 			}
 		}
-		mPath.close();
-		canvas.drawPath(mPath, mPaintGridFill);
 
-		// draw longitude lines
-		for (int i = 0; i < pointList.size(); i++) {
-			PointF pt = pointList.get(i);
-			canvas.drawLine(position.x, position.y, pt.x, pt.y, mPaintGridLongitude);
+		// Check compatibility
+		for (int i = 0; i < dataIn.length; i++) {
+			for (int j = 0; j < dataIn.length; j++) {
+
+				if(!dataIn[i].check(dataIn[j])) {
+					throw new Error(EXCEPTION_LAYER_COMPATIBILITY);
+				}
+			}	
 		}
 
-		//Draw web border
-		canvas.drawPath(mPath, mPaintGridBorder);
+		// Iterate for max value
+		for (int j = 0; j < dataIn.length; j++)  {
+			if(layersAllowed <= j) break;
+			if(dataIn[j].getMaxValue() > maxValue) maxValue = dataIn[j].getMaxValue();
+		}
 
-		// draw spider web
-		for (int j = 1; j < latitudeNum; j++) {
+		// Get grid labels
+		this.labels = dataIn[0].getLabels();
 
-			Path mPathInner = new Path();
-			List<PointF> pointListInner = getWebAxisPoints(j * 1f / latitudeNum);
+		// Get number of values
+		this.lonNum = dataIn[0].size();
 
-			for (int i = 0; i < pointListInner.size(); i++) {
-				PointF pt = pointListInner.get(i);
-				if (i == 0) {
-					mPathInner.moveTo(pt.x, pt.y);
-				} else {
-					mPathInner.lineTo(pt.x, pt.y);
-				}
+		// Set data to chart
+		if(dataLayers == null) this.dataLayers = new ArrayList<ARCDataLayer>();
+		for (ARCDataLayer element : dataIn){
+			dataLayers.add(element);
+		}
+
+		/*
+		 * Adding views
+		 */
+
+		arcGridView = setGridToChart();
+		addView(arcGridView);
+
+		arcDataLayerViews = new RadarDataLayer[layersAllowed];
+		for (int i = 0; i < arcDataLayerViews.length; i++) {
+			if(dataLayers.size() < i) break;
+			arcDataLayerViews[i] = setDataLayerToChart(i);
+			addView(arcDataLayerViews[i]);
+		}
+	}
+
+	public void addData(ARCDataLayer dataIn) throws Exception {
+
+		// Size check
+		if(dataIn.size() < DEFAULT_MIN_ELEMENT_DATALAYER) {
+			throw new Exception(EXCEPTION_WRONG_SIZE);
+		}
+
+		// Compatibility check
+		if(!(dataLayers == null) && !dataLayers.isEmpty()) {
+			if(!dataLayers.get(0).check(dataIn)) {
+				throw new Error(EXCEPTION_LAYER_COMPATIBILITY);
 			}
-			mPathInner.close();
-			canvas.drawPath(mPathInner, mPaintGridLatitude);
+		}else{
+			if(dataLayers == null) dataLayers = new ArrayList<ARCDataLayer>();
+		}
+
+		// Check/Set max value
+		if(dataIn.getMaxValue() > maxValue) maxValue = dataIn.getMaxValue();
+
+		// Get grid labels
+		this.labels = dataIn.getLabels();
+
+		// Get number of values
+		this.lonNum = dataIn.size();
+
+		// Add layer to list
+		dataLayers.add(dataIn);
+
+		/*
+		 * Adding views
+		 */
+		if(arcGridView == null){
+			arcGridView = setGridToChart();
+			addView(arcGridView);
+		}
+
+		// TODO Complete this function.
+	}
+	public void removeData(ARCDataLayer data) {
+		if(!dataLayers.remove(data)) return;
+		if(dataLayers.isEmpty()){
+			clearData();
+			return;
+		}
+
+		// Iterate for max value
+		maxValue = 0;
+		for (ARCDataLayer element : dataLayers) {	
+			if(element.getMaxValue()>maxValue) maxValue = element.getMaxValue();	
+		}
+	}
+	public void clearData(){
+		maxValue = 0;
+		lonNum = 0;
+		labels = null;
+
+		subtitleView = null;
+		dataLayers = null;
+	}
+
+	/*
+	 * View Manipulation 
+	 */
+
+	private RadarGrid setGridToChart(){
+		return new RadarGrid(context, lonNum, latNum, maxValue, labels, gridStyle);
+	}
+	private RadarDataLayer setDataLayerToChart(int index){
+		return new RadarDataLayer(context, maxValue, dataLayers.get(index));
+	}
+
+	/*
+	 * Animation methods
+	 */
+	
+	public void startAnimation(){
+		if(arcDataLayerViews == null) return; 
+		for (int i = 0; i < arcDataLayerViews.length; i++) {
+			if(arcDataLayerViews[i] != null)
+				arcDataLayerViews[i].startAnimation();
 		}
 	}
 	
-	protected void drawRadarGrid(Canvas canvas) {
-		Paint mPaintGridFill = new Paint();
-		mPaintGridFill.setColor(backgroundColor);
-		mPaintGridFill.setAntiAlias(true);
-
-		Paint mPaintGridBorder = new Paint();
-		mPaintGridBorder.setColor(
-				(gridBorderColor==-1)? gridLatitudeColor:gridBorderColor);
-		mPaintGridBorder.setStyle(Style.STROKE);
-		mPaintGridBorder.setStrokeWidth(
-				(gridBorderStrokeWidth==-1)? gridStrokeWidth:gridBorderStrokeWidth);
-		mPaintGridBorder.setAntiAlias(true);
-
-		Paint mPaintGridLatitude = new Paint();
-		mPaintGridLatitude.setColor(gridLatitudeColor);
-		mPaintGridLatitude.setStyle(Style.STROKE);
-		mPaintGridLatitude.setStrokeWidth(gridStrokeWidth);
-		mPaintGridLatitude.setAntiAlias(true);
-
-		Paint mPaintGridLongitude = new Paint();
-		mPaintGridLongitude.setColor(gridLongitudeColor);
-		mPaintGridLongitude.setStrokeWidth(gridStrokeWidth);
-
-		Paint mPaintLabelFont = new Paint();
-		mPaintLabelFont.setColor(gridLabelColor);
-		mPaintLabelFont.setTextSize(gridLabelSize);
-
-		List<PointF> pointList = getWebAxisPoints(1);
-
-		//Draw fill-background
-		if (data != null) {
-			for (int i = 0; i < pointList.size(); i++) {
-
-				// Draw labels. Label defined by the first list.
-				String title = data.get(0).get(i).getLabel();
-
-				Rect labelRect = new Rect();
-				mPaintLabelFont.getTextBounds(title, 0, title.length(), labelRect);
-
-				float offsetX = (float) (position.x - labelRect.width()/2
-						- (longitudeLength + gridLabelPadding) * Math.sin(i * 2 * Math.PI / longitudeNum) );
-				float offsetY = (float) (position.y + labelRect.height()/2
-						- (longitudeLength + gridLabelPadding) * Math.cos(i * 2 * Math.PI / longitudeNum));
-
-				canvas.drawText(title, offsetX, offsetY, mPaintLabelFont);
-			}
-		}
-		canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(1), mPaintGridFill);
-
-
-		// Draw longitude lines
-		for (int i = 0; i < pointList.size(); i++) {
-			PointF pt = pointList.get(i);
-			canvas.drawLine(position.x, position.y, pt.x, pt.y, mPaintGridLongitude);
-		}
-
-		//Draw grid border
-		canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(1), mPaintGridBorder);
-
-		// Draw latitude lines
-		for (int j = 1; j < latitudeNum; j++) {
-			canvas.drawCircle(position.x, position.y, getRadarRadiusPoints(j * 1f / latitudeNum), mPaintGridLatitude);
-		}
-	}
-	/**
-	 * <p>
-	 * Draw the data
-	 * </p>
-	 * 
-	 * @param canvas
+	/*
+	 * ViewGroup overriden functions
 	 */
-	protected void drawData(Canvas canvas) {
-		if (null != data) {
-			for (int j = 0; j < data.size(); j++) {
-				ARCDataLayer layer = data.get(j);
 
-				Paint mPaintFill = new Paint();
-				mPaintFill.setColor(layer.getLayerFillColor());
-				mPaintFill.setStyle(Style.FILL);
-				mPaintFill.setAntiAlias(true);
-				mPaintFill.setAlpha(layer.getLayerFillAlpha());
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-				Paint mPaintBorder = new Paint();
-				mPaintBorder.setColor(layer.getLayerBorderColor());
-				mPaintBorder.setStyle(Style.STROKE);
-				mPaintBorder.setStrokeWidth(layer.getLayerBorderWidth());
-				mPaintBorder.setAntiAlias(true);
-
-				//TODO Check. Paint to draw fonts.
-				Paint mPaintFont = new Paint();
-				mPaintFont.setColor(Color.WHITE);
-
-				// paint to draw points
-				Paint mPaintPoint = new Paint();
-				//TODO Get point color from ARCDataEntity
-				mPaintPoint.setColor(layer.getLayerBorderColor());
-
-				Path mPath = new Path();
-
-				// get points to draw
-				List<PointF> pointList = getDataPoints(layer);
-				// initialize path
-				for (int i = 0; i < pointList.size(); i++) {
-					PointF pt = pointList.get(i);
-					if (i == 0) {
-						mPath.moveTo(pt.x, pt.y);
-					} else {
-						mPath.lineTo(pt.x, pt.y);
-					}
-					canvas.drawCircle(pt.x, pt.y, 3, mPaintPoint);
-				}
-				mPath.close();
-
-				canvas.drawPath(mPath, mPaintFill);
-				canvas.drawPath(mPath, mPaintBorder);
-			}
+		//Call layout() on children
+		int numOfChildren = this.getChildCount();
+		for (int i=0; i < numOfChildren; i++ ) {
+			View child = this.getChildAt(i);
+			child.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
 		}
 	}
 
-	/**
-	 * @return the data
+	/*
+	 * Getters & Setters
 	 */
-	public List<ARCDataLayer> getData() {
-		return data;
-	}
 
-	/**
-	 * @param data
-	 *            the data to set
-	 */
-	public void setData(ArrayList<ARCDataLayer> data) {
-		this.data = data;
-	}
+	public void simultaneousLayersAllowed(int num) {
+		this.layersAllowed = num;
 
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
+		//TODO Fill this function.
 	}
-
-	/**
-	 * @param title
-	 *            the title to set
-	 */
-	public void setTitle(String title) {
-		this.title = title;
+	public void setLatitudeNum(int latNum) {
+		this.latNum = latNum;
 	}
-
-	/**
-	 * @return the position
-	 */
-	public Point getPosition() {
-		return position;
+	public void setGridStyle(GridLayerStyle style){
+		this.gridStyle = style;
+		if(arcGridView != null) arcGridView.setGridStyle(style);
 	}
-
-	/**
-	 * @param position
-	 *            the position to set
-	 */
-	public void setPosition(Point position) {
-		this.position = position;
-	}
-
-	/**
-	 * @return the displayLongitude
-	 */
-	public boolean isDisplayLongitude() {
-		return displayLongitude;
-	}
-
-	/**
-	 * @param displayLongitude
-	 *            the displayLongitude to set
-	 */
-	public void setDisplayLongitude(boolean displayLongitude) {
-		this.displayLongitude = displayLongitude;
-	}
-
-	/**
-	 * @return the longitudeNum
-	 */
-	public int getLongitudeNum() {
-		return longitudeNum;
-	}
-
-	/**
-	 * @param longitudeNum
-	 *            the longitudeNum to set
-	 */
-	public void setLongitudeNum(int longitudeNum) {
-		this.longitudeNum = longitudeNum;
-	}
-
-	/**
-	 * @return the longitudeColor
-	 */
-	public int getLongitudeColor() {
-		return longitudeColor;
-	}
-
-	/**
-	 * @param longitudeColor
-	 *            the longitudeColor to set
-	 */
-	public void setLongitudeColor(int longitudeColor) {
-		this.longitudeColor = longitudeColor;
-	}
-
-	/**
-	 * @return the longitudeLength
-	 */
-	public int getLongitudeLength() {
-		return longitudeLength;
-	}
-
-	/**
-	 * @param longitudeLength
-	 *            the longitudeLength to set
-	 */
-	public void setLongitudeLength(int longitudeLength) {
-		this.longitudeLength = longitudeLength;
-	}
-
-	/**
-	 * @return the displayLatitude
-	 */
-	public boolean isDisplayLatitude() {
-		return displayLatitude;
-	}
-
-	/**
-	 * @param displayLatitude
-	 *            the displayLatitude to set
-	 */
-	public void setDisplayLatitude(boolean displayLatitude) {
-		this.displayLatitude = displayLatitude;
-	}
-
-	/**
-	 * @return the latitudeNum
-	 */
-	public int getLatitudeNum() {
-		return latitudeNum;
-	}
-
-	/**
-	 * @param latitudeNum
-	 *            the latitudeNum to set
-	 */
-	public void setLatitudeNum(int latitudeNum) {
-		this.latitudeNum = latitudeNum;
-	}
-
-	/**
-	 * @return the backgroundColor
-	 */
-	public int getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	/**
-	 * @param backgroundColor the backgroundColor to set
-	 */
-	public void setBackgroundColor(int backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-	public void setGridLatitudeColor(int gridLatitudeColor) {
-		this.gridLatitudeColor = gridLatitudeColor;
-	}
-	public void setGridLongitudeColor(int gridLongitudeColor) {
-		this.gridLongitudeColor = gridLongitudeColor;
-	}
-	public void setGridStrokeWidth(float gridStrokeWidth) {
-		this.gridStrokeWidth = gridStrokeWidth;
-	}
-	public void setGridLabelColor(int color) {
-		this.gridLabelColor = color;
-	}
-	public void setGridLabelSize(float size){
-		this.gridLabelSize = size;
-	}
-	public void setGridBorderColor(int color){
-		this.gridBorderColor = color;
-	}
-	public void setChartGridType(int type){
-		this.chartType = type;
-	}
-	public void setGridBorderStrokeWidth(float width){
-		this.gridBorderStrokeWidth = width;
-	}
-	public void setGridLabelPadding(float gridLabelPadding) {
-		this.gridLabelPadding = gridLabelPadding;
+	public GridLayerStyle getGridStyle(){
+		if(arcGridView == null) return gridStyle;
+		else{
+			gridStyle = arcGridView.getGridStyle();
+			return arcGridView.getGridStyle();
+		}
 	}
 }

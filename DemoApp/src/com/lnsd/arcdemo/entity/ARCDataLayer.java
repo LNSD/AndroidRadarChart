@@ -1,74 +1,131 @@
 package com.lnsd.arcdemo.entity;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
-import android.graphics.Color;
+import android.animation.ObjectAnimator;
+import android.view.animation.Interpolator;
 
-public class ARCDataLayer {
-	public static final float DEFAULT_LBORDER_WIDTH = 2f;
-	public static final int DEFAULT_LFILL_ALPHA = 70;	
+@SuppressWarnings("serial")
+public class ARCDataLayer extends TreeMap<String, Float> {
+
+	private DataLayerStyle params = new DataLayerStyle();
+	private Interpolator inter = null;
+	private long duration = 0;
+	private String layerTitle = "";
+
+	/**
+	 * Empty constructor.
+	 */
+	public ARCDataLayer(){}
+
+	/*
+	 * Copy constructor
+	 * @param Data layer copy from
+	 */
+	public ARCDataLayer(ARCDataLayer data){
+		super(data);
+	}
+
+	/**
+	 * Class constructor.
+	 * @param params Custom styling.
+	 */
+	public ARCDataLayer(DataLayerStyle params){
+		this.params = params;
+	}
+
+	/**
+	 * Class constructor.
+	 * @param layerTitle Layer data series title.
+	 * @param params Custom styling.
+	 */
+	public ARCDataLayer(String layerTitle, DataLayerStyle params){
+		this.params = params;
+		this.layerTitle = layerTitle;
+	}
+
+	/**
+	 * Compares if both dataLayers are compatible.
+	 * If both DataLayer objects have the same keys stored, they are compatibles. 
+	 * @param dataLayer DataLayer to compare .
+	 * @return If compatible returns true, false otherwise.
+	 */
+	public boolean check(ARCDataLayer dataLayer){
+		if(this.size() != dataLayer.size()) return false;
+		for (Map.Entry<String,Float> entry: dataLayer.entrySet()) {
+			if(!containsKey(entry.getKey())) return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Gets the maximum value stored in the DataLayer.
+	 * @return Maximum value.
+	 */
+	public float getMaxValue(){
+		float max = 0;
+		for (Map.Entry<String,Float> entry: entrySet()) {
+			if(entry.getValue()>max) max = entry.getValue();
+		}
+		return max;
+	}
+
+	/**
+	 * Gets all the layer labels.
+	 * @return Array of labels.
+	 */
+	public String[] getLabels() {
+		ArrayList<String> labels = new ArrayList<String>();
+		for (Map.Entry<String,Float> entry: entrySet()) {
+			labels.add(entry.getKey());
+		}
+		return (String[]) labels.toArray(new String[labels.size()]);
+	}
+
+	/*
+	 * Getters & Setters
+	 */
+
+	public DataLayerStyle getLayerStyle() {
+		return params;
+	}
+	public void setLayerStyle(DataLayerStyle params) {
+		this.params = params;
+	}
+	public String getLayerTitle() {
+		return layerTitle;
+	}
+	public void setLayerTitle(String layerTitle) {
+		this.layerTitle = layerTitle;
+	}
+
+	/*
+	 * Animation methods
+	 */
 	
-	private ArrayList<ARCDataEntity> dataList = new ArrayList<ARCDataEntity>();
-	private int layerBorderColor = Color.BLACK;
-	private float layerBorderWidth = DEFAULT_LBORDER_WIDTH;
-	private int layerFillColor = Color.BLACK;
-	private int layerFillAlpha = DEFAULT_LFILL_ALPHA;
-
-	public ARCDataLayer(int color, float borderWidth){
-		this.layerBorderColor = color;
-		this.layerBorderWidth = borderWidth;
-		this.layerFillColor = Color.TRANSPARENT;
+	public void animateData(long duration) {
+		this.duration = duration;
 	}
-	public ARCDataLayer(int fillColor, int alpha){
-		this.layerBorderColor = fillColor;
-		this.layerFillColor = fillColor;
-		this.layerFillAlpha = alpha;
-	}
-	public ARCDataLayer(int strokeColor, float borderWidth, int fillColor, int fillAlpha){
-		this.layerBorderColor = strokeColor;
-		this.layerBorderWidth = borderWidth;
-		this.layerFillColor = fillColor;
-		this.layerFillAlpha = fillAlpha;
+	public void animateData(Interpolator inter, long duration) {
+		this.inter = inter;
+		this.duration = duration;
 	}
 
-	public void add(ARCDataEntity data){
-		if(data.getPointColor() == -1)
-			data.setPointColor(layerBorderColor);
-		dataList.add(data);
+	public void setAnimDuration(long duration) {
+		this.duration = duration;
 	}
-	public ArrayList<ARCDataEntity> getDataList(){
-		return dataList;
-	}
- 	public ARCDataEntity get(int index){
-		return dataList.get(index);
-	}
-	public int getDataEntitiesLength(){
-		return dataList.size();
-	}
-
-	public void setLayerBorderColor(int color){
-		this.layerBorderColor = color;
-	}
-	public int getLayerBorderColor(){
-		return layerBorderColor;
-	}
-	public void setLayerFillColor(int color){
-		this.layerFillColor = color;
-	}
-	public int getLayerFillColor(){
-		return layerFillColor;
-	}
-	public void setLayerBorderWidth(float layerBorderWidth) {
-		this.layerBorderWidth = layerBorderWidth;
-	}
-	public float getLayerBorderWidth() {
-		return layerBorderWidth;
-	}	
-	public void setLayerFillAlpha(int layerFillAlpha) {
-		this.layerFillAlpha = layerFillAlpha;
-	}
-	public int getLayerFillAlpha() {
-		return layerFillAlpha;
+	public void setAnimInterpolator(Interpolator inter){
+		this.inter = inter;
 	}
 	
+	public Interpolator getInterpolator() {
+		return inter;
+	}
+
+	public long getDuration() {
+		return duration;
+	}
 }
