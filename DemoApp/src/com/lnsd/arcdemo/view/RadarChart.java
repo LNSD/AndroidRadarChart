@@ -186,8 +186,16 @@ public class RadarChart extends Chart {
 	}
 
 	// Gesture methods
-	public void stepForwardViewList(){} 	// TODO Rename & fill
-	public void stepBackViewList(){} 		// TODO Rename & fill
+	public void shiftForward(){
+		if(dataLayers == null) return;
+		dataLayers.add(0, dataLayers.remove(dataLayers.size()-1));
+		updateChart();
+	}
+	public void shiftBackward(){
+		if(dataLayers == null) return;
+		dataLayers.add(dataLayers.remove(0));
+		updateChart();
+	}
 
 	/*
 	 * Animation methods
@@ -196,7 +204,7 @@ public class RadarChart extends Chart {
 	public void startAnimation(){
 		if(arcDataLayerViews == null) return; 
 		for (int i = 0; i < arcDataLayerViews.length; i++) {
-				arcDataLayerViews[i].startAnimation();
+				if(arcDataLayerViews[i] != null) arcDataLayerViews[i].startAnimation();
 		}
 	}
 

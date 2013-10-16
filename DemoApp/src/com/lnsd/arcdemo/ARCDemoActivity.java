@@ -59,7 +59,7 @@ public class ARCDemoActivity extends Activity {
 		data1.put("E", 10f);
 		data1.put("F", 5f);
 		
-		data1.animateData(5000); // ms		
+		data1.animateData(1000); // ms		
 		
 		p = new DataLayerStyle();
 		p.setLayerBorderColor(Color.YELLOW);
@@ -68,7 +68,8 @@ public class ARCDemoActivity extends Activity {
 		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data2 = new ARCDataLayer(p);
-
+		data2.animateData(3000); // ms
+		
 		data2.put("A", 3f);
 		data2.put("B", 7f);
 		data2.put("C", 12f);
@@ -83,6 +84,7 @@ public class ARCDemoActivity extends Activity {
 		p.setLayerFillAlpha(DataLayerStyle.DEFAULT_LFILL_ALPHA);
 
 		ARCDataLayer data3 = new ARCDataLayer(p);
+		data3.animateData(5000); // ms	
 
 		data3.put("A", 12f);
 		data3.put("B", 3f);
@@ -94,7 +96,7 @@ public class ARCDemoActivity extends Activity {
 		
 		data3.put("E", 9f); 
 		data3.put("F", 3f);
-		data3.put("F", 50f);
+		data3.put("F", 20f);
 		
 		ArrayList<ARCDataLayer> data = new ArrayList<ARCDataLayer>();
 		data.add(data1);
@@ -107,8 +109,18 @@ public class ARCDemoActivity extends Activity {
 			e.printStackTrace();
 		}
 		
+		//Green back, Yellow front
+		chart.shiftForward();
+		//Red back, Green front
+		chart.shiftForward();
+		//Yellow back, red front
+		chart.shiftBackward();
+		//Red back, Green front
+		chart.shiftBackward();
+		//Green back, yellow front
 		
 		chart.removeData(data2);
+		
 		chart.startAnimation();
 		
 			
